@@ -1,10 +1,10 @@
--- Load the library (assuming it's in the same directory)
+### Load the library (assuming it's in the same directory)
 ```
 local ZIvyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mark22028/Boring/refs/heads/main/ZIvyerUILib.txt"))()
 ```
 
 ---------------------------------------------------------------------------------
-# Basic Setup
+-- Basic Setup
 ---------------------------------------------------------------------------------
 
 ### Create a new UI with customized intro (intro will always show for 5 seconds)
