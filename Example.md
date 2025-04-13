@@ -4,10 +4,10 @@ local ZIvyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mark22
 ```
 
 ---------------------------------------------------------------------------------
--- Basic Setup
+--# Basic Setup
 ---------------------------------------------------------------------------------
 
-# Create a new UI with customized intro (intro will always show for 5 seconds)
+### Create a new UI with customized intro (intro will always show for 5 seconds)
 ```
 local UI = ZIvyer.new({
     UIName = "My Super Smooth App", -- Name of the UI in Explorer
@@ -15,7 +15,7 @@ local UI = ZIvyer.new({
     IntroDescription = "Experience the super duper ultra ultimate smoothness" -- Description in intro
 })
 ```
-## All themes are available: Dark, Light, Black, Green, Cyan, Blue, Diamond, Gold, Yellow, Pink, Gray/Grey, Red, Orange, Purple, Violet, White
+### All themes are available: Dark, Light, Black, Green, Cyan, Blue, Diamond, Gold, Yellow, Pink, Gray/Grey, Red, Orange, Purple, Violet, White
 ```
 UI:SetTheme("Dark") -- Start with Dark theme
 ```
@@ -24,15 +24,15 @@ UI:SetTheme("Dark") -- Start with Dark theme
 -- Windows
 ---------------------------------------------------------------------------------
 
-# Create a main window
+### Create a main window
 ```
 local mainWindow = UI:CreateWindow("Main Features", UDim2.new(0, 400, 0, 350))
 ```
-# Create a settings window
+### Create a settings window
 ```
 local settingsWindow = UI:CreateWindow("Settings", UDim2.new(0, 350, 0, 300), UDim2.new(0.7, 0, 0.3, 0))
 ```
-# Create a premium window (only visible when premium is enabled)
+### Create a premium window (only visible when premium is enabled)
 ```
 local premiumWindow = UI:CreateWindow("Premium Features", UDim2.new(0, 350, 0, 300), UDim2.new(0.3, 0, 0.7, 0), true)
 ```
@@ -41,19 +41,19 @@ local premiumWindow = UI:CreateWindow("Premium Features", UDim2.new(0, 350, 0, 3
 -- Elements - Main Window
 ---------------------------------------------------------------------------------
 
-# Section helps organize elements
+### Section helps organize elements
 ```
 local generalSection = mainWindow:AddSection("General Controls")
 ```
-# Add a label (static text)
+### Add a label (static text)
 ```
 generalSection:AddLabel("Texts or Version")
 ```
-# Add a paragraph for more detailed information
+### Add a paragraph for more detailed information
 ```
 generalSection:AddParagraph("About", "ZIvyer UI Library provides super duper ultra ultimate smooth animations and modern UI elements for your Roblox games.")
 ```
-# Add a button with callback function
+### Add a button with callback function
 ```
 mainWindow:AddButton("Click Me", function()
     print("Button clicked!")
@@ -61,28 +61,28 @@ mainWindow:AddButton("Click Me", function()
     -- But notifications are disabled in the library by request
 end)
 ```
-# Add a toggle switch
+### Add a toggle switch
 ```
 local myToggle = mainWindow:AddToggle("Enable Feature", function(state)
     print("Toggle state:", state)
     -- This would enable/disable some feature in your game
 end)
 ```
-# Add a slider
+### Add a slider
 ```
 local mySlider = mainWindow:AddSlider("Intensity", 0, 100, 50, function(value)
     print("Slider value:", value)
     -- You would use this value to control something in your game
 end)
 ```
-# Add a textbox
+### Add a textbox
 ```
 local myTextBox = mainWindow:AddTextBox("Username", "Enter text here...", function(text)
     print("Text entered:", text)
     -- You would use this to get user input
 end)
 ```
-# Add a dropdown menu
+### Add a dropdown menu
 ```
 local options = {"Option 1", "Option 2", "Option 3"}
 local myDropdown = mainWindow:AddDropdown("Select Option", options, function(selected)
@@ -90,7 +90,7 @@ local myDropdown = mainWindow:AddDropdown("Select Option", options, function(sel
     -- You would handle the selected option here
 end)
 ```
-# Add a colorpicker
+### Add a colorpicker
 ```
 local myColorPicker = mainWindow:AddColorPicker("Choose Color", Color3.new(1, 0, 0), function(color)
     print("Color selected:", color)
@@ -102,12 +102,12 @@ end)
 -- Elements - Settings Window
 ---------------------------------------------------------------------------------
 
-# Theme Section
+### Theme Section
 ```
 local themeSection = settingsWindow:AddSection("Theme Settings")
 themeSection:EnableRainbowOutline(true) -- Add fancy rainbow outline to this section
 ```
-# Add theme selector buttons
+### Add theme selector buttons
 ```
 local themeOptions = {"Dark", "Light", "Black", "Green", "Cyan", "Blue", "Diamond", 
                       "Gold", "Yellow", "Pink", "Gray", "Red", "Orange", "Purple", "Violet", "White"}
@@ -118,7 +118,7 @@ for _, theme in ipairs(themeOptions) do
     end)
 end
 ```
-# Add custom theme creator
+### Add custom theme creator
 ```
 settingsWindow:AddTextBox("Custom RGB", "255,0,0", function(text)
     -- Create a custom theme from RGB values
@@ -132,17 +132,17 @@ settingsWindow:AddTextBox("Roblox Image ID", "12345678", function(text)
     UI:SetTheme("ImageTheme")
 end)
 ```
-# UI Settings
+### UI Settings
 ```
 local uiSection = settingsWindow:AddSection("UI Settings")
 ```
-# Add toggle for UI visibility
+### Add toggle for UI visibility
 ```
 uiSection:AddButton("Toggle UI", function()
     UI:ToggleUI()
 end)
 ```
-# Add button to destroy UI 
+### Add button to destroy UI 
 ```
 uiSection:AddButton("Destroy UI", function()
     UI:Destroy()
@@ -153,11 +153,11 @@ end)
 -- Premium Features
 ---------------------------------------------------------------------------------
 
-# Set up key system (keys that will allow premium access)
+### Set up key system (keys that will allow premium access)
 ```
 UI:SetupKeySystem({"PREMIUM123", "ZIVYER2023"}, 3) -- valid keys, max attempts
 ```
-# Add button to open key verification window
+### Add button to open key verification window
 ```
 settingsWindow:AddButton("Enter Premium Key", function()
     UI:ShowKeyWindow("ZIvyer Premium", "Enter your premium key below to unlock exclusive features", 
@@ -177,32 +177,32 @@ settingsWindow:AddButton("Enter Premium Key", function()
     )
 end)
 ```
-# Directly enable premium without key (for testing)
+### Directly enable premium without key (for testing)
 ```
 local devSection = settingsWindow:AddSection("Developer Options")
 devSection:AddToggle("Enable Premium", function(state)
     UI:SetPremiumOnlyEnabled(state)
 end)
 ```
-# Add premium-only elements
+### Add premium-only elements
 ```
 local premiumSection = premiumWindow:AddSection("Exclusive Features")
 premiumSection:EnableRainbowOutline(true) -- Rainbow glow for premium
 ```
-# Special premium-only buttons with extra particle effects
+### Special premium-only buttons with extra particle effects
 ```
 premiumWindow:AddButton("Premium Particle Burst", function()
     -- This would create special effects in your game
     print("Premium feature activated!")
 end, true) -- The 'true' parameter marks this as premium-only
 ```
-# Premium-only slider with enhanced visuals
+### Premium-only slider with enhanced visuals
 ```
 premiumWindow:AddSlider("Premium Power", 0, 1000, 500, function(value)
     print("Premium power set to:", value)
 end, true) -- Premium-only
 ```
-# Enable premium feature toggle (would be false until premium is activated)
+### Enable premium feature toggle (would be false until premium is activated)
 ```
 print("Premium status:", UI:IsPremiumOnly())
 ```
@@ -214,7 +214,7 @@ print("Premium status:", UI:IsPremiumOnly())
 -- Full PremiumOnly Examples
 ---------------------------------------------------------------------------------
 
-# PREMIUM WINDOWS EXAMPLE
+### PREMIUM WINDOWS EXAMPLE
 -- ---------------------
 ```
 -- Create a premium-only window (the true at the end makes it premium-only)
@@ -223,7 +223,7 @@ local premiumWindow = UI:CreateWindow("Premium Window", UDim2.new(0, 450, 0, 350
 -- Create a regular window for comparison
 local regularWindow = UI:CreateWindow("Regular Window", UDim2.new(0, 400, 0, 300), UDim2.new(0.2, 0, 0.2, 0))
 ```
-# PREMIUM SECTIONS EXAMPLE
+### PREMIUM SECTIONS EXAMPLE
 -- ----------------------
 ```
 -- Add a premium section (the true at the end makes it premium-only)
@@ -232,7 +232,7 @@ local premiumSection = regularWindow:AddSection("Premium Section", true)
 -- Add a regular section for comparison
 local regularSection = regularWindow:AddSection("Regular Section")
 ```
-# PREMIUM TABS EXAMPLE
+### PREMIUM TABS EXAMPLE
 -- ------------------
 ```
 -- Add a premium tab (the true at the end makes it premium-only)
@@ -241,7 +241,7 @@ local premiumTab = regularWindow:AddTab("Premium Tab", true)
 -- Add a regular tab for comparison
 local regularTab = regularWindow:AddTab("Regular Tab")
 ```
-# PREMIUM ELEMENTS EXAMPLE
+### PREMIUM ELEMENTS EXAMPLE
 -- ----------------------
 ```
 # BUTTONS
@@ -256,7 +256,7 @@ regularSection:AddButton("Regular Button", function()
     print("Regular button clicked")
 end)
 ```
-# TOGGLES
+### TOGGLES
 ```
 -- Premium toggle (notice the true at the end)
 regularSection:AddToggle("Premium Toggle", function(enabled)
@@ -269,7 +269,7 @@ regularSection:AddToggle("Regular Toggle", function(enabled)
     print("Regular toggle:", enabled)
 end)
 ```
-# SLIDERS
+### SLIDERS
 ```
 -- Premium slider (notice the true at the end)
 regularSection:AddSlider("Premium Slider", 0, 100, 50, function(value)
@@ -282,7 +282,7 @@ regularSection:AddSlider("Regular Slider", 0, 100, 50, function(value)
     print("Regular slider value:", value)
 end)
 ```
-# DROPDOWNS
+### DROPDOWNS
 ```
 -- Premium dropdown (notice the true at the end)
 regularSection:AddDropdown("Premium Dropdown", {"Option 1", "Option 2", "Option 3"}, function(selected)
@@ -295,7 +295,7 @@ regularSection:AddDropdown("Regular Dropdown", {"Option 1", "Option 2", "Option 
     print("Regular dropdown selected:", selected)
 end)
 ```
-# TEXTBOXES
+### TEXTBOXES
 ```
 -- Premium textbox (notice the true at the end)
 regularSection:AddTextBox("Premium TextBox", "Enter premium text...", function(text)
@@ -308,7 +308,7 @@ regularSection:AddTextBox("Regular TextBox", "Enter text...", function(text)
     print("Regular textbox text:", text)
 end)
 ```
-# COLOR PICKERS
+### COLOR PICKERS
 ```
 -- Premium color picker (notice the true at the end)
 regularSection:AddColorPicker("Premium Color", Color3.fromRGB(255, 0, 0), function(color)
@@ -321,7 +321,7 @@ regularSection:AddColorPicker("Regular Color", Color3.fromRGB(0, 255, 0), functi
     print("Regular color selected:", color)
 end)
 ```
-# PARAGRAPHS
+### PARAGRAPHS
 ```
 -- Premium paragraph (notice the true at the end)
 regularSection:AddParagraph("Premium Info", "This is premium content with ultra-smooth animations", nil, nil, true)
@@ -330,7 +330,7 @@ regularSection:AddParagraph("Premium Info", "This is premium content with ultra-
 -- Regular paragraph for comparison
 regularSection:AddParagraph("Regular Info", "This is regular content with ultra-smooth animations")
 ```
-# LABELS
+### LABELS
 ```
 -- Premium label (notice the true at the end)
 regularSection:AddLabel("Premium Label Text", true)
@@ -339,7 +339,7 @@ regularSection:AddLabel("Premium Label Text", true)
 -- Regular label for comparison
 regularSection:AddLabel("Regular Label Text")
 ```
-# PREMIUM TAB ELEMENTS
+### PREMIUM TAB ELEMENTS
 -- ------------------
 ```
 -- You can add premium elements to premium tabs too
@@ -359,7 +359,7 @@ regularTab:AddButton("Premium in Regular Tab", function()
     print("Premium button in regular tab clicked")
 end, true)
 ```
-# PREMIUM SECTION ELEMENTS
+### PREMIUM SECTION ELEMENTS
 -- ----------------------
 ```
 -- You can add premium elements to premium sections too (already premium by association)
@@ -371,13 +371,15 @@ end)
 -- Special premium section
 premiumSection:EnableRainbowOutline(true) -- Add rainbow animation to the outline
 ```
-# CONTROLLING PREMIUM ACCESS
+### CONTROLLING PREMIUM ACCESS
 -- ------------------------
--- Enable all premium elements
+**Enable all premium elements**
 ```
 UI:SetPremiumOnlyEnabled(true)
 ```
--- To disable premium elements, you would use:
+**To disable premium elements, you would use:**
 ```
 UI:SetPremiumOnlyEnabled(false)
 ```
+
+*By mark071274 on discord*
