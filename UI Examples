@@ -1,0 +1,175 @@
+-- Load the library (assuming it's in the same directory)
+local ZIvyer = loadstring(game:HttpGet("https://your-hosting-url.com/ZIvyer.lua"))()
+
+---------------------------------------------------------------------------------
+-- Basic Setup
+---------------------------------------------------------------------------------
+
+-- Create a new UI with customized intro (intro will always show for 5 seconds)
+local UI = ZIvyer.new({
+    UIName = "My Super Smooth App", -- Name of the UI in Explorer
+    IntroTitle = "My Super App", -- Title shown in intro
+    IntroDescription = "Experience the super duper ultra ultimate smoothness" -- Description in intro
+})
+
+-- All themes are available: Dark, Light, Black, Green, Cyan, Blue, Diamond, 
+-- Gold, Yellow, Pink, Gray/Grey, Red, Orange, Purple, Violet, White
+UI:SetTheme("Cyan") -- Start with Cyan theme
+
+---------------------------------------------------------------------------------
+-- Windows
+---------------------------------------------------------------------------------
+
+-- Create a main window
+local mainWindow = UI:CreateWindow("Main Features", UDim2.new(0, 400, 0, 350))
+
+-- Create a settings window
+local settingsWindow = UI:CreateWindow("Settings", UDim2.new(0, 350, 0, 300), UDim2.new(0.7, 0, 0.3, 0))
+
+-- Create a premium window (only visible when premium is enabled)
+local premiumWindow = UI:CreateWindow("Premium Features", UDim2.new(0, 350, 0, 300), UDim2.new(0.3, 0, 0.7, 0), true)
+
+---------------------------------------------------------------------------------
+-- Elements - Main Window
+---------------------------------------------------------------------------------
+
+-- Section helps organize elements
+local generalSection = mainWindow:AddSection("General Controls")
+
+-- Add a label (static text)
+generalSection:AddLabel("Welcome to ZIvyer UI Library Demo")
+
+-- Add a paragraph for more detailed information
+generalSection:AddParagraph("About", "ZIvyer UI Library provides super duper ultra ultimate smooth animations and modern UI elements for your Roblox games.")
+
+-- Add a button with callback function
+mainWindow:AddButton("Click Me", function()
+    print("Button clicked!")
+    -- You could animate the button by adding particle bursts here
+    -- But notifications are disabled in the library by request
+end)
+
+-- Add a toggle switch
+local myToggle = mainWindow:AddToggle("Enable Feature", function(state)
+    print("Toggle state:", state)
+    -- This would enable/disable some feature in your game
+end)
+
+-- Add a slider
+local mySlider = mainWindow:AddSlider("Intensity", 0, 100, 50, function(value)
+    print("Slider value:", value)
+    -- You would use this value to control something in your game
+end)
+
+-- Add a textbox
+local myTextBox = mainWindow:AddTextBox("Username", "Enter text here...", function(text)
+    print("Text entered:", text)
+    -- You would use this to get user input
+end)
+
+-- Add a dropdown menu
+local options = {"Option 1", "Option 2", "Option 3"}
+local myDropdown = mainWindow:AddDropdown("Select Option", options, function(selected)
+    print("Selected option:", selected)
+    -- You would handle the selected option here
+end)
+
+-- Add a colorpicker
+local myColorPicker = mainWindow:AddColorPicker("Choose Color", Color3.new(1, 0, 0), function(color)
+    print("Color selected:", color)
+    -- You would use this color in your game
+end)
+
+---------------------------------------------------------------------------------
+-- Elements - Settings Window
+---------------------------------------------------------------------------------
+
+-- Theme Section
+local themeSection = settingsWindow:AddSection("Theme Settings")
+themeSection:EnableRainbowOutline(true) -- Add fancy rainbow outline to this section
+
+-- Add theme selector buttons
+local themeOptions = {"Dark", "Light", "Black", "Green", "Cyan", "Blue", "Diamond", 
+                      "Gold", "Yellow", "Pink", "Gray", "Red", "Orange", "Purple", "Violet", "White"}
+
+for _, theme in ipairs(themeOptions) do
+    settingsWindow:AddButton("Theme: " .. theme, function()
+        UI:SetTheme(theme)
+    end)
+end
+
+-- Add custom theme creator
+settingsWindow:AddTextBox("Custom RGB", "255,0,0", function(text)
+    -- Create a custom theme from RGB values
+    UI:CreateThemeFromRobloxId("CustomTheme", text, false)
+    UI:SetTheme("CustomTheme")
+end)
+
+settingsWindow:AddTextBox("Roblox Image ID", "12345678", function(text)
+    -- Create a theme with a custom background image
+    UI:CreateThemeFromRobloxId("ImageTheme", text, true)
+    UI:SetTheme("ImageTheme")
+end)
+
+-- UI Settings
+local uiSection = settingsWindow:AddSection("UI Settings")
+
+-- Add toggle for UI visibility
+uiSection:AddButton("Toggle UI", function()
+    UI:ToggleUI()
+end)
+
+-- Add button to destroy UI 
+uiSection:AddButton("Destroy UI", function()
+    UI:Destroy()
+end)
+
+---------------------------------------------------------------------------------
+-- Premium Features
+---------------------------------------------------------------------------------
+
+-- Set up key system (keys that will allow premium access)
+UI:SetupKeySystem({"PREMIUM123", "ZIVYER2023"}, 3) -- valid keys, max attempts
+
+-- Add button to open key verification window
+settingsWindow:AddButton("Enter Premium Key", function()
+    UI:ShowKeyWindow("ZIvyer Premium", "Enter your premium key below to unlock exclusive features", 
+        function() 
+            -- Success callback
+            print("Key verification successful!")
+        end,
+        function(attempts, maxAttempts) 
+            -- Failure callback
+            print("Invalid key! Attempts: " .. attempts .. "/" .. maxAttempts)
+        end,
+        function() 
+            -- Too many attempts callback
+            print("Too many failed attempts. Try again later.")
+        end,
+        true -- Enable premium features on success
+    )
+end)
+
+-- Directly enable premium without key (for testing)
+local devSection = settingsWindow:AddSection("Developer Options")
+devSection:AddToggle("Enable Premium", function(state)
+    UI:SetPremiumOnlyEnabled(state)
+end)
+
+-- Add premium-only elements
+local premiumSection = premiumWindow:AddSection("Exclusive Features")
+premiumSection:EnableRainbowOutline(true) -- Rainbow glow for premium
+
+-- Special premium-only buttons with extra particle effects
+premiumWindow:AddButton("Premium Particle Burst", function()
+    -- This would create special effects in your game
+    print("Premium feature activated!")
+end, true) -- The 'true' parameter marks this as premium-only
+
+-- Premium-only slider with enhanced visuals
+premiumWindow:AddSlider("Premium Power", 0, 1000, 500, function(value)
+    print("Premium power set to:", value)
+end, true) -- Premium-only
+
+-- Enable premium feature toggle (would be false until premium is activated)
+print("Premium status:", UI:IsPremiumOnly())
