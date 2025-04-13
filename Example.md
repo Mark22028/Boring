@@ -51,7 +51,7 @@ generalSection:AddLabel("Texts or Version")
 ```
 ### Add a paragraph for more detailed information
 ```
-generalSection:AddParagraph("About", "ZIvyer UI Library provides super duper ultra ultimate smooth animations and modern UI elements for your Roblox games.")
+generalSection:AddParagraph("About", "Text")
 ```
 ### Add a button with callback function
 ```
