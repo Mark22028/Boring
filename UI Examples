@@ -1,5 +1,5 @@
 -- Load the library (assuming it's in the same directory)
-local ZIvyer = loadstring(game:HttpGet("https://your-hosting-url.com/ZIvyer.lua"))()
+local ZIvyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mark22028/Boring/refs/heads/main/ZIvyerUILib.txt"))()
 
 ---------------------------------------------------------------------------------
 -- Basic Setup
