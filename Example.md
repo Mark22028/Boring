@@ -1,5 +1,7 @@
 -- Load the library (assuming it's in the same directory)
-```local ZIvyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mark22028/Boring/refs/heads/main/ZIvyerUILib.txt"))()```
+```
+local ZIvyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mark22028/Boring/refs/heads/main/ZIvyerUILib.txt"))()
+```
 
 ---------------------------------------------------------------------------------
 -- Basic Setup
@@ -14,29 +16,43 @@ local UI = ZIvyer.new({
 })
 ```
 ## All themes are available: Dark, Light, Black, Green, Cyan, Blue, Diamond, Gold, Yellow, Pink, Gray/Grey, Red, Orange, Purple, Violet, White
-```UI:SetTheme("Dark") -- Start with Dark theme```
+```
+UI:SetTheme("Dark") -- Start with Dark theme
+```
 
 ---------------------------------------------------------------------------------
 -- Windows
 ---------------------------------------------------------------------------------
 
 # Create a main window
-```local mainWindow = UI:CreateWindow("Main Features", UDim2.new(0, 400, 0, 350))```
+```
+local mainWindow = UI:CreateWindow("Main Features", UDim2.new(0, 400, 0, 350))
+```
 # Create a settings window
-```local settingsWindow = UI:CreateWindow("Settings", UDim2.new(0, 350, 0, 300), UDim2.new(0.7, 0, 0.3, 0))```
+```
+local settingsWindow = UI:CreateWindow("Settings", UDim2.new(0, 350, 0, 300), UDim2.new(0.7, 0, 0.3, 0))
+```
 # Create a premium window (only visible when premium is enabled)
-```local premiumWindow = UI:CreateWindow("Premium Features", UDim2.new(0, 350, 0, 300), UDim2.new(0.3, 0, 0.7, 0), true)```
+```
+local premiumWindow = UI:CreateWindow("Premium Features", UDim2.new(0, 350, 0, 300), UDim2.new(0.3, 0, 0.7, 0), true)
+```
 
 ---------------------------------------------------------------------------------
 -- Elements - Main Window
 ---------------------------------------------------------------------------------
 
 # Section helps organize elements
-```local generalSection = mainWindow:AddSection("General Controls")```
+```
+local generalSection = mainWindow:AddSection("General Controls")
+```
 # Add a label (static text)
-```generalSection:AddLabel("Texts or Version")```
+```
+generalSection:AddLabel("Texts or Version")
+```
 # Add a paragraph for more detailed information
-```generalSection:AddParagraph("About", "ZIvyer UI Library provides super duper ultra ultimate smooth animations and modern UI elements for your Roblox games.")```
+```
+generalSection:AddParagraph("About", "ZIvyer UI Library provides super duper ultra ultimate smooth animations and modern UI elements for your Roblox games.")
+```
 # Add a button with callback function
 ```
 mainWindow:AddButton("Click Me", function()
@@ -117,7 +133,9 @@ settingsWindow:AddTextBox("Roblox Image ID", "12345678", function(text)
 end)
 ```
 # UI Settings
-```local uiSection = settingsWindow:AddSection("UI Settings")```
+```
+local uiSection = settingsWindow:AddSection("UI Settings")
+```
 # Add toggle for UI visibility
 ```
 uiSection:AddButton("Toggle UI", function()
@@ -136,7 +154,9 @@ end)
 ---------------------------------------------------------------------------------
 
 # Set up key system (keys that will allow premium access)
-```UI:SetupKeySystem({"PREMIUM123", "ZIVYER2023"}, 3) -- valid keys, max attempts```
+```
+UI:SetupKeySystem({"PREMIUM123", "ZIVYER2023"}, 3) -- valid keys, max attempts
+```
 # Add button to open key verification window
 ```
 settingsWindow:AddButton("Enter Premium Key", function()
@@ -183,7 +203,9 @@ premiumWindow:AddSlider("Premium Power", 0, 1000, 500, function(value)
 end, true) -- Premium-only
 ```
 # Enable premium feature toggle (would be false until premium is activated)
-```print("Premium status:", UI:IsPremiumOnly())```
+```
+print("Premium status:", UI:IsPremiumOnly())
+```
 
 
 
@@ -227,112 +249,135 @@ local regularTab = regularWindow:AddTab("Regular Tab")
 regularSection:AddButton("Premium Button", function()
     print("Premium button clicked")
 end, true)
-
+```
+```
 -- Regular button for comparison
 regularSection:AddButton("Regular Button", function()
     print("Regular button clicked")
 end)
-
+```
 # TOGGLES
+```
 -- Premium toggle (notice the true at the end)
 regularSection:AddToggle("Premium Toggle", function(enabled)
     print("Premium toggle:", enabled)
 end, true)
-
+```
+```
 -- Regular toggle for comparison
 regularSection:AddToggle("Regular Toggle", function(enabled)
     print("Regular toggle:", enabled)
 end)
-
+```
 # SLIDERS
+```
 -- Premium slider (notice the true at the end)
 regularSection:AddSlider("Premium Slider", 0, 100, 50, function(value)
     print("Premium slider value:", value)
 end, true)
-
+```
+```
 -- Regular slider for comparison
 regularSection:AddSlider("Regular Slider", 0, 100, 50, function(value)
     print("Regular slider value:", value)
 end)
-
+```
 # DROPDOWNS
+```
 -- Premium dropdown (notice the true at the end)
 regularSection:AddDropdown("Premium Dropdown", {"Option 1", "Option 2", "Option 3"}, function(selected)
     print("Premium dropdown selected:", selected)
 end, true)
-
+```
+```
 -- Regular dropdown for comparison
 regularSection:AddDropdown("Regular Dropdown", {"Option 1", "Option 2", "Option 3"}, function(selected)
     print("Regular dropdown selected:", selected)
 end)
-
+```
 # TEXTBOXES
+```
 -- Premium textbox (notice the true at the end)
 regularSection:AddTextBox("Premium TextBox", "Enter premium text...", function(text)
     print("Premium textbox text:", text)
 end, true)
-
+```
+```
 -- Regular textbox for comparison
 regularSection:AddTextBox("Regular TextBox", "Enter text...", function(text)
     print("Regular textbox text:", text)
 end)
-
+```
 # COLOR PICKERS
+```
 -- Premium color picker (notice the true at the end)
 regularSection:AddColorPicker("Premium Color", Color3.fromRGB(255, 0, 0), function(color)
     print("Premium color selected:", color)
 end, true)
-
+```
+```
 -- Regular color picker for comparison
 regularSection:AddColorPicker("Regular Color", Color3.fromRGB(0, 255, 0), function(color)
     print("Regular color selected:", color)
 end)
-
+```
 # PARAGRAPHS
+```
 -- Premium paragraph (notice the true at the end)
 regularSection:AddParagraph("Premium Info", "This is premium content with ultra-smooth animations", nil, nil, true)
-
+```
+```
 -- Regular paragraph for comparison
 regularSection:AddParagraph("Regular Info", "This is regular content with ultra-smooth animations")
-
+```
 # LABELS
+```
 -- Premium label (notice the true at the end)
 regularSection:AddLabel("Premium Label Text", true)
-
+```
+```
 -- Regular label for comparison
 regularSection:AddLabel("Regular Label Text")
-
+```
 # PREMIUM TAB ELEMENTS
 -- ------------------
+```
 -- You can add premium elements to premium tabs too
 premiumTab:AddButton("Tab Premium Button", function()
     print("Tab premium button clicked")
 end)
-
+```
+```
 -- Or regular elements to premium tabs (they're premium by association)
 premiumTab:AddToggle("Tab Toggle", function(enabled)
     print("Tab toggle:", enabled)
 end)
-
+```
+```
 -- You can add premium elements to regular tabs too
 regularTab:AddButton("Premium in Regular Tab", function()
     print("Premium button in regular tab clicked")
 end, true)
-
+```
 # PREMIUM SECTION ELEMENTS
 -- ----------------------
+```
 -- You can add premium elements to premium sections too (already premium by association)
 premiumSection:AddButton("Section Premium Button", function()
     print("Section premium button clicked")
 end)
-
+```
+```
 -- Special premium section
 premiumSection:EnableRainbowOutline(true) -- Add rainbow animation to the outline
 ```
 # CONTROLLING PREMIUM ACCESS
 -- ------------------------
 -- Enable all premium elements
-```UI:SetPremiumOnlyEnabled(true)```
-
+```
+UI:SetPremiumOnlyEnabled(true)
+```
 -- To disable premium elements, you would use:
--- UI:SetPremiumOnlyEnabled(false)
+```
+UI:SetPremiumOnlyEnabled(false)
+```
