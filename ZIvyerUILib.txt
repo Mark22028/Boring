@@ -1,0 +1,3088 @@
+
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
+
+local ZIvyer = {}
+ZIvyer.__index = ZIvyer
+
+local ANIMATION_DURATION = 0.3
+local OUTLINE_GLOW_INTENSITY = 0.7
+local DEFAULT_CORNER_RADIUS = 8
+local VERSION = "1.0.0"
+
+local AnimationPresets = {
+    Fade = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Transparency = goal})
+    end,
+    
+    Scale = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = goal})
+    end,
+    
+    Position = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Position = goal})
+    end,
+    
+    Color = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BackgroundColor3 = goal})
+    end,
+    
+    Rotation = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut), {Rotation = goal})
+    end,
+    
+    TextColor = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {TextColor3 = goal})
+    end,
+    
+    BorderColor = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {BorderColor3 = goal})
+    end,
+    
+    ImageColor = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {ImageColor3 = goal})
+    end,
+    
+    GlowIntensity = function(obj, goal, duration)
+        return TweenService:Create(obj, TweenInfo.new(duration or ANIMATION_DURATION, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Brightness = goal})
+    end
+}
+
+local Themes = {
+    Dark = {
+        BackgroundColor = Color3.fromRGB(25, 25, 30),
+        SecondaryBackgroundColor = Color3.fromRGB(35, 35, 40),
+        TextColor = Color3.fromRGB(240, 240, 240),
+        AccentColor = Color3.fromRGB(90, 140, 240),
+        ToggleOnColor = Color3.fromRGB(60, 200, 120),
+        ToggleOffColor = Color3.fromRGB(180, 180, 180),
+        OutlineColor = Color3.fromRGB(90, 140, 240),
+        ButtonColor = Color3.fromRGB(45, 45, 50),
+        ShadowColor = Color3.fromRGB(0, 0, 0),
+        BorderColor = Color3.fromRGB(55, 55, 60)
+    },
+    
+    Light = {
+        BackgroundColor = Color3.fromRGB(245, 245, 250),
+        SecondaryBackgroundColor = Color3.fromRGB(235, 235, 240),
+        TextColor = Color3.fromRGB(40, 40, 40),
+        AccentColor = Color3.fromRGB(70, 120, 220),
+        ToggleOnColor = Color3.fromRGB(60, 200, 120),
+        ToggleOffColor = Color3.fromRGB(150, 150, 150),
+        OutlineColor = Color3.fromRGB(70, 120, 220),
+        ButtonColor = Color3.fromRGB(220, 220, 225),
+        ShadowColor = Color3.fromRGB(190, 190, 190),
+        BorderColor = Color3.fromRGB(210, 210, 215)
+    },
+    
+    Black = {
+        BackgroundColor = Color3.fromRGB(10, 10, 10),
+        SecondaryBackgroundColor = Color3.fromRGB(20, 20, 20),
+        TextColor = Color3.fromRGB(240, 240, 240),
+        AccentColor = Color3.fromRGB(180, 180, 180),
+        ToggleOnColor = Color3.fromRGB(80, 80, 80),
+        ToggleOffColor = Color3.fromRGB(50, 50, 50),
+        OutlineColor = Color3.fromRGB(100, 100, 100),
+        ButtonColor = Color3.fromRGB(30, 30, 30),
+        ShadowColor = Color3.fromRGB(0, 0, 0),
+        BorderColor = Color3.fromRGB(40, 40, 40)
+    },
+    
+    White = {
+        BackgroundColor = Color3.fromRGB(255, 255, 255),
+        SecondaryBackgroundColor = Color3.fromRGB(245, 245, 245),
+        TextColor = Color3.fromRGB(40, 40, 40),
+        AccentColor = Color3.fromRGB(220, 220, 220),
+        ToggleOnColor = Color3.fromRGB(180, 180, 180),
+        ToggleOffColor = Color3.fromRGB(220, 220, 220),
+        OutlineColor = Color3.fromRGB(200, 200, 200),
+        ButtonColor = Color3.fromRGB(240, 240, 240),
+        ShadowColor = Color3.fromRGB(220, 220, 220),
+        BorderColor = Color3.fromRGB(230, 230, 230)
+    },
+    
+    Green = {
+        BackgroundColor = Color3.fromRGB(20, 40, 30),
+        SecondaryBackgroundColor = Color3.fromRGB(30, 50, 40),
+        TextColor = Color3.fromRGB(220, 240, 220),
+        AccentColor = Color3.fromRGB(40, 200, 110),
+        ToggleOnColor = Color3.fromRGB(80, 220, 140),
+        ToggleOffColor = Color3.fromRGB(100, 120, 110),
+        OutlineColor = Color3.fromRGB(40, 200, 110),
+        ButtonColor = Color3.fromRGB(40, 60, 50),
+        ShadowColor = Color3.fromRGB(10, 20, 15),
+        BorderColor = Color3.fromRGB(50, 120, 80)
+    },
+    
+    Blue = {
+        BackgroundColor = Color3.fromRGB(20, 30, 50),
+        SecondaryBackgroundColor = Color3.fromRGB(30, 40, 60),
+        TextColor = Color3.fromRGB(220, 230, 255),
+        AccentColor = Color3.fromRGB(50, 120, 230),
+        ToggleOnColor = Color3.fromRGB(70, 150, 240),
+        ToggleOffColor = Color3.fromRGB(100, 110, 130),
+        OutlineColor = Color3.fromRGB(50, 120, 230),
+        ButtonColor = Color3.fromRGB(40, 50, 70),
+        ShadowColor = Color3.fromRGB(10, 15, 25),
+        BorderColor = Color3.fromRGB(60, 90, 150)
+    },
+    
+    Cyan = {
+        BackgroundColor = Color3.fromRGB(20, 40, 45),
+        SecondaryBackgroundColor = Color3.fromRGB(30, 50, 55),
+        TextColor = Color3.fromRGB(220, 240, 245),
+        AccentColor = Color3.fromRGB(0, 210, 220),
+        ToggleOnColor = Color3.fromRGB(0, 230, 240),
+        ToggleOffColor = Color3.fromRGB(100, 130, 135),
+        OutlineColor = Color3.fromRGB(0, 210, 220),
+        ButtonColor = Color3.fromRGB(40, 60, 65),
+        ShadowColor = Color3.fromRGB(10, 20, 22),
+        BorderColor = Color3.fromRGB(0, 170, 180)
+    },
+    
+    Diamond = {
+        BackgroundColor = Color3.fromRGB(20, 35, 45),
+        SecondaryBackgroundColor = Color3.fromRGB(30, 45, 55),
+        TextColor = Color3.fromRGB(220, 240, 255),
+        AccentColor = Color3.fromRGB(150, 230, 255),
+        ToggleOnColor = Color3.fromRGB(100, 200, 255),
+        ToggleOffColor = Color3.fromRGB(100, 120, 130),
+        OutlineColor = Color3.fromRGB(150, 230, 255),
+        ButtonColor = Color3.fromRGB(40, 55, 65),
+        ShadowColor = Color3.fromRGB(10, 18, 22),
+        BorderColor = Color3.fromRGB(90, 180, 210)
+    },
+    
+    Gold = {
+        BackgroundColor = Color3.fromRGB(40, 35, 25),
+        SecondaryBackgroundColor = Color3.fromRGB(50, 45, 35),
+        TextColor = Color3.fromRGB(255, 240, 200),
+        AccentColor = Color3.fromRGB(255, 200, 70),
+        ToggleOnColor = Color3.fromRGB(255, 220, 100),
+        ToggleOffColor = Color3.fromRGB(150, 140, 120),
+        OutlineColor = Color3.fromRGB(255, 200, 70),
+        ButtonColor = Color3.fromRGB(60, 55, 45),
+        ShadowColor = Color3.fromRGB(20, 18, 12),
+        BorderColor = Color3.fromRGB(200, 170, 60)
+    },
+    
+    Yellow = {
+        BackgroundColor = Color3.fromRGB(40, 40, 30),
+        SecondaryBackgroundColor = Color3.fromRGB(50, 50, 40),
+        TextColor = Color3.fromRGB(250, 250, 220),
+        AccentColor = Color3.fromRGB(255, 240, 100),
+        ToggleOnColor = Color3.fromRGB(255, 255, 120),
+        ToggleOffColor = Color3.fromRGB(150, 150, 130),
+        OutlineColor = Color3.fromRGB(255, 240, 100),
+        ButtonColor = Color3.fromRGB(60, 60, 50),
+        ShadowColor = Color3.fromRGB(20, 20, 15),
+        BorderColor = Color3.fromRGB(200, 190, 80)
+    },
+    
+    Pink = {
+        BackgroundColor = Color3.fromRGB(40, 30, 35),
+        SecondaryBackgroundColor = Color3.fromRGB(50, 40, 45),
+        TextColor = Color3.fromRGB(250, 220, 235),
+        AccentColor = Color3.fromRGB(255, 120, 180),
+        ToggleOnColor = Color3.fromRGB(255, 150, 200),
+        ToggleOffColor = Color3.fromRGB(150, 130, 140),
+        OutlineColor = Color3.fromRGB(255, 120, 180),
+        ButtonColor = Color3.fromRGB(60, 50, 55),
+        ShadowColor = Color3.fromRGB(20, 15, 18),
+        BorderColor = Color3.fromRGB(200, 100, 150)
+    },
+    
+    Gray = {
+        BackgroundColor = Color3.fromRGB(40, 40, 40),
+        SecondaryBackgroundColor = Color3.fromRGB(50, 50, 50),
+        TextColor = Color3.fromRGB(220, 220, 220),
+        AccentColor = Color3.fromRGB(150, 150, 150),
+        ToggleOnColor = Color3.fromRGB(170, 170, 170),
+        ToggleOffColor = Color3.fromRGB(120, 120, 120),
+        OutlineColor = Color3.fromRGB(150, 150, 150),
+        ButtonColor = Color3.fromRGB(60, 60, 60),
+        ShadowColor = Color3.fromRGB(20, 20, 20),
+        BorderColor = Color3.fromRGB(100, 100, 100)
+    },
+    
+    Red = {
+        BackgroundColor = Color3.fromRGB(40, 25, 25),
+        SecondaryBackgroundColor = Color3.fromRGB(50, 35, 35),
+        TextColor = Color3.fromRGB(250, 220, 220),
+        AccentColor = Color3.fromRGB(230, 60, 60),
+        ToggleOnColor = Color3.fromRGB(250, 80, 80),
+        ToggleOffColor = Color3.fromRGB(150, 120, 120),
+        OutlineColor = Color3.fromRGB(230, 60, 60),
+        ButtonColor = Color3.fromRGB(60, 45, 45),
+        ShadowColor = Color3.fromRGB(20, 12, 12),
+        BorderColor = Color3.fromRGB(180, 80, 80)
+    },
+    
+    Orange = {
+        BackgroundColor = Color3.fromRGB(40, 30, 25),
+        SecondaryBackgroundColor = Color3.fromRGB(50, 40, 35),
+        TextColor = Color3.fromRGB(250, 230, 210),
+        AccentColor = Color3.fromRGB(255, 140, 50),
+        ToggleOnColor = Color3.fromRGB(255, 160, 70),
+        ToggleOffColor = Color3.fromRGB(150, 130, 120),
+        OutlineColor = Color3.fromRGB(255, 140, 50),
+        ButtonColor = Color3.fromRGB(60, 50, 45),
+        ShadowColor = Color3.fromRGB(20, 15, 12),
+        BorderColor = Color3.fromRGB(200, 120, 60)
+    },
+    
+    Purple = {
+        BackgroundColor = Color3.fromRGB(35, 25, 40),
+        SecondaryBackgroundColor = Color3.fromRGB(45, 35, 50),
+        TextColor = Color3.fromRGB(230, 220, 250),
+        AccentColor = Color3.fromRGB(150, 80, 230),
+        ToggleOnColor = Color3.fromRGB(170, 100, 250),
+        ToggleOffColor = Color3.fromRGB(130, 120, 150),
+        OutlineColor = Color3.fromRGB(150, 80, 230),
+        ButtonColor = Color3.fromRGB(55, 45, 60),
+        ShadowColor = Color3.fromRGB(18, 12, 20),
+        BorderColor = Color3.fromRGB(120, 70, 180)
+    },
+    
+    Violet = {
+        BackgroundColor = Color3.fromRGB(35, 30, 45),
+        SecondaryBackgroundColor = Color3.fromRGB(45, 40, 55),
+        TextColor = Color3.fromRGB(230, 225, 250),
+        AccentColor = Color3.fromRGB(180, 130, 230),
+        ToggleOnColor = Color3.fromRGB(200, 150, 250),
+        ToggleOffColor = Color3.fromRGB(130, 125, 150),
+        OutlineColor = Color3.fromRGB(180, 130, 230),
+        ButtonColor = Color3.fromRGB(55, 50, 65),
+        ShadowColor = Color3.fromRGB(18, 15, 22),
+        BorderColor = Color3.fromRGB(140, 100, 190)
+    }
+}
+}
+
+local Utilities = {
+    CreateCorner = function(parent, radius)
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, radius or DEFAULT_CORNER_RADIUS)
+        corner.Parent = parent
+        return corner
+    end,
+    
+    CreateOutline = function(parent, thickness, color, transparency)
+        local outline = Instance.new("UIStroke")
+        outline.Thickness = thickness or 2
+        outline.Color = color or Themes.Dark.OutlineColor
+        outline.Transparency = transparency or 0
+        outline.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+        outline.Parent = parent
+        
+        local glow = Instance.new("UIGradient")
+        glow.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.new(1, 1, 1)),
+            ColorSequenceKeypoint.new(1, Color3.new(0.9, 0.9, 0.9))
+        })
+        glow.Parent = outline
+        
+        spawn(function()
+            local rotation = 0
+            while parent and parent.Parent do
+                rotation = (rotation + 1) % 360
+                glow.Rotation = rotation
+                RunService.Heartbeat:Wait()
+            end
+        end)
+        
+        return outline
+    end,
+    
+    CreateShadow = function(parent, size, transparency)
+        local shadow = Instance.new("ImageLabel")
+        shadow.Name = "Shadow"
+        shadow.BackgroundTransparency = 1
+        shadow.Position = UDim2.new(0.5, 0, 0.5, 0)
+        shadow.AnchorPoint = Vector2.new(0.5, 0.5)
+        shadow.Size = UDim2.new(1, size or 20, 1, size or 20)
+        shadow.ZIndex = parent.ZIndex - 1
+        shadow.Image = "rbxassetid://5554236805"
+        shadow.ImageColor3 = Themes.Dark.ShadowColor
+        shadow.ImageTransparency = transparency or 0.6
+        shadow.ScaleType = Enum.ScaleType.Slice
+        shadow.SliceCenter = Rect.new(23, 23, 277, 277)
+        shadow.Parent = parent
+        
+        return shadow
+    end,
+    
+    CreateRipple = function(parent, color)
+        return function(input)
+            local ripple = Instance.new("Frame")
+            ripple.Name = "Ripple"
+            ripple.Parent = parent
+            ripple.BackgroundColor3 = color or Color3.new(1, 1, 1)
+            ripple.BackgroundTransparency = 0.7
+            ripple.BorderSizePixel = 0
+            ripple.ZIndex = parent.ZIndex + 1
+            
+            Utilities.CreateCorner(ripple, parent.AbsoluteSize.X)
+            
+            local size = math.max(parent.AbsoluteSize.X, parent.AbsoluteSize.Y) * 1.5
+            local pos = input.Position
+            local startPos = UDim2.new(0, pos.X - parent.AbsolutePosition.X, 0, pos.Y - parent.AbsolutePosition.Y)
+            
+            ripple.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset - size/2, startPos.Y.Scale, startPos.Y.Offset - size/2)
+            ripple.Size = UDim2.new(0, 0, 0, 0)
+            
+            local target = UDim2.new(0, size, 0, size)
+            local sizeTween = AnimationPresets.Scale(ripple, target, 0.5)
+            local fadeTween = AnimationPresets.Fade(ripple, 1, 0.5)
+            
+            sizeTween:Play()
+            fadeTween:Play()
+            
+            fadeTween.Completed:Connect(function()
+                ripple:Destroy()
+            end)
+        end
+    end,
+    
+    MakeDraggable = function(frame, handle)
+        handle = handle or frame
+        
+        local dragging = false
+        local dragInput
+        local dragStart
+        local startPos
+        
+        local function update(input)
+            local delta = input.Position - dragStart
+            local targetPos = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            local tween = AnimationPresets.Position(frame, targetPos, 0.1)
+            tween:Play()
+        end
+        
+        handle.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dragging = true
+                dragStart = input.Position
+                startPos = frame.Position
+                
+                input.Changed:Connect(function()
+                    if input.UserInputState == Enum.UserInputState.End then
+                        dragging = false
+                    end
+                end)
+            end
+        end)
+        
+        handle.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if input == dragInput and dragging then
+                update(input)
+            end
+        end)
+    end,
+    
+    CreateDiamondButton = function(parent, position, size, color)
+        local diamond = Instance.new("ImageButton")
+        diamond.Name = "DiamondButton"
+        diamond.BackgroundTransparency = 1
+        diamond.Position = position or UDim2.new(1, -25, 0, 5)
+        diamond.Size = size or UDim2.new(0, 20, 0, 20)
+        diamond.Image = "rbxassetid://6764432408"  
+        diamond.ImageColor3 = color or Themes.Dark.AccentColor
+        diamond.ZIndex = parent.ZIndex + 5
+        diamond.Parent = parent
+        
+        local glow = Instance.new("ImageLabel")
+        glow.Name = "Glow"
+        glow.BackgroundTransparency = 1
+        glow.Position = UDim2.new(0.5, 0, 0.5, 0)
+        glow.Size = UDim2.new(1.5, 0, 1.5, 0)
+        glow.AnchorPoint = Vector2.new(0.5, 0.5)
+        glow.Image = "rbxassetid://6764432408"  
+        glow.ImageColor3 = diamond.ImageColor3
+        glow.ImageTransparency = 0.7
+        glow.ZIndex = diamond.ZIndex - 1
+        glow.Parent = diamond
+        
+        spawn(function()
+            while diamond and diamond.Parent do
+                local tween1 = TweenService:Create(glow, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(1.8, 0, 1.8, 0), ImageTransparency = 0.9})
+                local tween2 = TweenService:Create(glow, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(1.5, 0, 1.5, 0), ImageTransparency = 0.7})
+                
+                tween1:Play()
+                tween1.Completed:Wait()
+                tween2:Play()
+                tween2.Completed:Wait()
+            end
+        end)
+        
+        Utilities.MakeDraggable(diamond, diamond)
+        
+        return diamond
+    end,
+    
+    WobbleEffect = function(object, intensity, duration)
+        intensity = intensity or 1.3
+        duration = duration or 1
+        
+        local originalSize = object.Size
+        local startTime = tick()
+        
+        local connection = RunService.Heartbeat:Connect(function()
+            local elapsed = tick() - startTime
+            local progress = elapsed / duration
+            
+            if progress > 1 then
+                connection:Disconnect()
+                object.Size = originalSize
+                return
+            end
+            
+            local wobbleX = math.sin(progress * math.pi * 8) * (1 - progress) * intensity
+            local wobbleY = math.sin(progress * math.pi * 6) * (1 - progress) * intensity
+            
+            object.Size = UDim2.new(
+                originalSize.X.Scale * (1 + wobbleX * 0.05), originalSize.X.Offset,
+                originalSize.Y.Scale * (1 + wobbleY * 0.05), originalSize.Y.Offset
+            )
+        end)
+        
+        return connection
+    end,
+    
+    PulsingGlow = function(object, color, intensity)
+        intensity = intensity or 0.3
+        
+        local glow = object:FindFirstChild("GlowEffect")
+        if not glow then
+            glow = Instance.new("UIStroke")
+            glow.Name = "GlowEffect"
+            glow.Color = color or Color3.new(1, 1, 1)
+            glow.Thickness = 1.5
+            glow.Transparency = 0
+            glow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+            glow.Parent = object
+        end
+        
+        spawn(function()
+            while object and object.Parent do
+                local pulse1 = TweenService:Create(glow, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+                    Thickness = 3,
+                    Transparency = intensity
+                })
+                
+                local pulse2 = TweenService:Create(glow, TweenInfo.new(1.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {
+                    Thickness = 1.5,
+                    Transparency = 0
+                })
+                
+                pulse1:Play()
+                pulse1.Completed:Wait()
+                pulse2:Play()
+                pulse2.Completed:Wait()
+            end
+        end)
+        
+        return glow
+    end,
+    
+    RainbowColorEffect = function(object, property, speed)
+        property = property or "BackgroundColor3"
+        speed = speed or 0.5
+        
+        local startTime = tick()
+        
+        local connection = RunService.Heartbeat:Connect(function()
+            if not object or not object.Parent then
+                connection:Disconnect()
+                return
+            end
+            
+            local elapsed = (tick() - startTime) * speed
+            
+            local h = (elapsed % 1)
+            local s = 0.7
+            local v = 1
+            
+            local hi = math.floor(h * 6) % 6
+            local f = h * 6 - hi
+            local p = v * (1 - s)
+            local q = v * (1 - f * s)
+            local t = v * (1 - (1 - f) * s)
+            
+            local r, g, b
+            
+            if hi == 0 then r, g, b = v, t, p
+            elseif hi == 1 then r, g, b = q, v, p
+            elseif hi == 2 then r, g, b = p, v, t
+            elseif hi == 3 then r, g, b = p, q, v
+            elseif hi == 4 then r, g, b = t, p, v
+            else r, g, b = v, p, q
+            end
+            
+            object[property] = Color3.new(r, g, b)
+        end)
+        
+        return connection
+    end,
+    
+    ParticleBurst = function(position, parent, count, color)
+        count = count or 20
+        color = color or Color3.new(1, 1, 1)
+        
+        for i = 1, count do
+            local particle = Instance.new("Frame")
+            particle.Name = "Particle"
+            particle.Size = UDim2.new(0, math.random(3, 6), 0, math.random(3, 6))
+            particle.Position = position
+            particle.AnchorPoint = Vector2.new(0.5, 0.5)
+            particle.BackgroundColor3 = color
+            particle.BorderSizePixel = 0
+            particle.ZIndex = parent.ZIndex + 2
+            particle.Parent = parent
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = particle
+            
+            local angle = math.random() * math.pi * 2
+            local speed = math.random(50, 150)
+            local dx = math.cos(angle) * speed
+            local dy = math.sin(angle) * speed
+            
+            local totalTime = math.random(5, 15) / 10
+            local startTime = tick()
+            
+            spawn(function()
+                while particle and particle.Parent do
+                    local elapsed = tick() - startTime
+                    if elapsed > totalTime then
+                        particle:Destroy()
+                        break
+                    end
+                    
+                    local progress = elapsed / totalTime
+                    local alpha = 1 - progress
+                    
+                    local gravity = 200 * progress
+                    local newX = position.X.Offset + dx * progress
+                    local newY = position.Y.Offset + dy * progress + gravity * progress
+                    
+                    particle.Position = UDim2.new(position.X.Scale, newX, position.Y.Scale, newY)
+                    particle.BackgroundTransparency = progress
+                    particle.Size = UDim2.new(0, particle.Size.X.Offset * (1 - progress * 0.5), 0, particle.Size.Y.Offset * (1 - progress * 0.5))
+                    
+                    RunService.RenderStepped:Wait()
+                end
+            end)
+        end
+    end,
+    
+    SpringAnimation = function(object, targetPosition, strength, damping)
+        strength = strength or 10
+        damping = damping or 0.75
+        
+        local velocity = Vector2.new(0, 0)
+        local currentPosition = object.Position
+        local targetUDim2 = targetPosition
+        
+        local targetVector2 = Vector2.new(
+            targetUDim2.X.Offset + targetUDim2.X.Scale * object.Parent.AbsoluteSize.X,
+            targetUDim2.Y.Offset + targetUDim2.Y.Scale * object.Parent.AbsoluteSize.Y
+        )
+        
+        local connection = RunService.RenderStepped:Connect(function(deltaTime)
+            deltaTime = math.min(deltaTime, 0.1)
+            
+            local currentVector2 = Vector2.new(
+                currentPosition.X.Offset + currentPosition.X.Scale * object.Parent.AbsoluteSize.X,
+                currentPosition.Y.Offset + currentPosition.Y.Scale * object.Parent.AbsoluteSize.Y
+            )
+            
+            local acceleration = (targetVector2 - currentVector2) * strength
+            velocity = velocity * damping + acceleration * deltaTime
+            local newPosition = currentVector2 + velocity * deltaTime
+            
+            currentPosition = UDim2.new(
+                0, newPosition.X,
+                0, newPosition.Y
+            )
+            
+            object.Position = currentPosition
+            
+            if (targetVector2 - currentVector2).Magnitude < 1 and velocity.Magnitude < 1 then
+                connection:Disconnect()
+                object.Position = targetPosition
+            end
+        end)
+        
+        return connection
+    end,
+    
+    CircularProgress = function(parent, size, color, thickness)
+        size = size or 40
+        color = color or Color3.new(0, 0.7, 1)
+        thickness = thickness or 4
+        
+        local container = Instance.new("Frame")
+        container.Name = "CircularProgress"
+        container.Size = UDim2.new(0, size, 0, size)
+        container.Position = UDim2.new(0.5, 0, 0.5, 0)
+        container.AnchorPoint = Vector2.new(0.5, 0.5)
+        container.BackgroundTransparency = 1
+        container.Parent = parent
+        
+        local segments = 12
+        local circles = {}
+        
+        for i = 1, segments do
+            local circle = Instance.new("Frame")
+            circle.Name = "Segment" .. i
+            circle.Size = UDim2.new(0, thickness, 0, thickness)
+            circle.AnchorPoint = Vector2.new(0.5, 0.5)
+            circle.BackgroundColor3 = color
+            circle.BackgroundTransparency = 0.1 + (i-1) * 0.9 / segments
+            circle.BorderSizePixel = 0
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(1, 0)
+            corner.Parent = circle
+            
+            circle.Parent = container
+            circles[i] = circle
+        end
+        
+        spawn(function()
+            local angle = 0
+            local radius = (size - thickness) / 2
+            
+            while container and container.Parent do
+                angle = angle + 0.1
+                
+                for i, circle in ipairs(circles) do
+                    local segmentAngle = angle - (i-1) * math.pi * 2 / #circles
+                    local x = math.cos(segmentAngle) * radius
+                    local y = math.sin(segmentAngle) * radius
+                    
+                    circle.Position = UDim2.new(0.5, x, 0.5, y)
+                end
+                
+                RunService.RenderStepped:Wait()
+            end
+        end)
+        
+        return container
+    end
+}
+
+function ZIvyer.new(options)
+    local self = setmetatable({}, ZIvyer)
+    
+    self.Initialized = false
+    self.CurrentTheme = "Dark"
+    self.Windows = {}
+    self.Visible = true
+    self.Themes = Themes
+    
+    self.ValidKeys = {}
+    self.PremiumOnlyEnabled = false  
+    self.CurrentKey = ""
+    self.KeyAttempts = 0
+    self.MaxKeyAttempts = 5
+    self.KeyCheckCooldown = false
+    
+    options = options or {}
+    
+    self.UIName = options.UIName or "ZIvyer UI"
+    self.IntroTitle = options.IntroTitle or "ZIvyer UI"
+    self.IntroDescription = options.IntroDescription or "Super Duper Ultra Ultimate Smooth UI Library"
+    
+    self.ScreenGui = Instance.new("ScreenGui")
+    self.ScreenGui.Name = self.UIName
+    self.ScreenGui.ResetOnSpawn = false
+    self.ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    pcall(function()
+        self.ScreenGui.Parent = CoreGui
+    end)
+    
+    if self.ScreenGui.Parent == nil then
+        self.ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    end
+    
+    self.Initialized = true
+    
+    self:ShowIntro(self.IntroTitle, self.IntroDescription)
+    
+    return self
+end
+
+function ZIvyer:CreateWindow(title, size, position, premiumOnly)
+    local window = {}
+    window.Elements = {}
+    window.PremiumOnly = premiumOnly or false
+    
+    title = title or "Super Duper Smooth Window"
+    size = size or UDim2.new(0, 400, 0, 300)
+    position = position or UDim2.new(0.5, -200, 0.5, -150)
+    
+    window.Frame = Instance.new("Frame")
+    window.Frame.Name = title .. "Window"
+    window.Frame.Size = UDim2.new(0, 0, 0, 0)  
+    window.Frame.Position = position
+    window.Frame.BackgroundColor3 = self.Themes[self.CurrentTheme].BackgroundColor
+    window.Frame.BorderSizePixel = 0
+    window.Frame.ZIndex = 10
+    window.Frame.Parent = self.ScreenGui
+    
+    Utilities.CreateCorner(window.Frame, DEFAULT_CORNER_RADIUS)
+    
+    Utilities.CreateShadow(window.Frame, 30, 0.5)
+    
+    window.Outline = Utilities.CreateOutline(window.Frame, 2, self.Themes[self.CurrentTheme].OutlineColor, 0)
+    
+    window.TitleBar = Instance.new("Frame")
+    window.TitleBar.Name = "TitleBar"
+    window.TitleBar.Size = UDim2.new(1, 0, 0, 30)
+    window.TitleBar.Position = UDim2.new(0, 0, 0, 0)
+    window.TitleBar.BackgroundColor3 = self.Themes[self.CurrentTheme].AccentColor
+    window.TitleBar.BorderSizePixel = 0
+    window.TitleBar.ZIndex = 11
+    window.TitleBar.Parent = window.Frame
+    
+    Utilities.CreateCorner(window.TitleBar, DEFAULT_CORNER_RADIUS)
+    
+    local titleBarCornerFix = Instance.new("Frame")
+    titleBarCornerFix.Name = "CornerFix"
+    titleBarCornerFix.Size = UDim2.new(1, 0, 0.5, 0)
+    titleBarCornerFix.Position = UDim2.new(0, 0, 0.5, 0)
+    titleBarCornerFix.BackgroundColor3 = window.TitleBar.BackgroundColor3
+    titleBarCornerFix.BorderSizePixel = 0
+    titleBarCornerFix.ZIndex = 11
+    titleBarCornerFix.Parent = window.TitleBar
+    
+    window.Title = Instance.new("TextLabel")
+    window.Title.Name = "TitleText"
+    window.Title.Size = UDim2.new(1, -40, 1, 0)
+    window.Title.Position = UDim2.new(0, 10, 0, 0)
+    window.Title.BackgroundTransparency = 1
+    window.Title.Text = title
+    window.Title.Font = Enum.Font.GothamSemibold
+    window.Title.TextSize = 14
+    window.Title.TextColor3 = Color3.new(1, 1, 1)
+    window.Title.TextXAlignment = Enum.TextXAlignment.Left
+    window.Title.ZIndex = 12
+    window.Title.Parent = window.TitleBar
+    
+    window.Content = Instance.new("Frame")
+    window.Content.Name = "Content"
+    window.Content.Size = UDim2.new(1, -20, 1, -40)
+    window.Content.Position = UDim2.new(0, 10, 0, 35)
+    window.Content.BackgroundColor3 = self.Themes[self.CurrentTheme].SecondaryBackgroundColor
+    window.Content.BorderSizePixel = 0
+    window.Content.ZIndex = 10
+    window.Content.ClipsDescendants = true
+    window.Content.Parent = window.Frame
+    
+    Utilities.CreateCorner(window.Content, DEFAULT_CORNER_RADIUS - 2)
+    
+    window.DiamondButton = Utilities.CreateDiamondButton(window.Frame)
+    
+    window.DiamondButton.MouseButton1Click:Connect(function()
+        if window.IsVisible then
+            local rotateTween = AnimationPresets.Rotation(window.DiamondButton, 180, 0.5)
+            local fadeTween = AnimationPresets.Fade(window.Frame, 1, 0.5)
+            local sizeTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+            
+            rotateTween:Play()
+            fadeTween:Play()
+            sizeTween:Play()
+            
+            sizeTween.Completed:Connect(function()
+                window.Frame.Visible = false
+                window.IsVisible = false
+            end)
+        else
+            window.Frame.Visible = true
+            window.IsVisible = true
+            
+            local rotateTween = AnimationPresets.Rotation(window.DiamondButton, 0, 0.5)
+            local fadeTween = AnimationPresets.Fade(window.Frame, 0, 0.5)
+            local sizeTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = size})
+            
+            rotateTween:Play()
+            fadeTween:Play()
+            sizeTween:Play()
+        end
+    end)
+    
+    Utilities.MakeDraggable(window.Frame, window.TitleBar)
+    
+    window.DefaultSize = size
+    window.IsVisible = true
+    
+    local openTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = size})
+    openTween:Play()
+    
+    table.insert(self.Windows, window)
+    
+    function window:SetTheme(theme)
+        local themeTable = Themes[theme]
+        if not themeTable then return end
+        
+        local bgTween = AnimationPresets.Color(self.Frame, themeTable.BackgroundColor)
+        local titleTween = AnimationPresets.Color(self.TitleBar, themeTable.AccentColor)
+        local titleFixTween = AnimationPresets.Color(self.TitleBar.CornerFix, themeTable.AccentColor)
+        local contentTween = AnimationPresets.Color(self.Content, themeTable.SecondaryBackgroundColor)
+        local outlineTween = AnimationPresets.BorderColor(self.Outline, themeTable.OutlineColor)
+        local diamondTween = AnimationPresets.ImageColor(self.DiamondButton, themeTable.AccentColor)
+        local diamondGlowTween = AnimationPresets.ImageColor(self.DiamondButton.Glow, themeTable.AccentColor)
+        
+        bgTween:Play()
+        titleTween:Play()
+        titleFixTween:Play()
+        contentTween:Play()
+        outlineTween:Play()
+        diamondTween:Play()
+        diamondGlowTween:Play()
+        
+        for _, element in pairs(self.Elements) do
+            if element.UpdateTheme then
+                element:UpdateTheme(theme)
+            end
+        end
+    end
+    
+    function window:AddButton(text, callback, premiumOnly)
+        local button = {}
+        button.PremiumOnly = premiumOnly or false
+        
+        button.Frame = Instance.new("Frame")
+        button.Frame.Name = text .. "Button"
+        button.Frame.Size = UDim2.new(1, -20, 0, 36)
+        button.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        button.Frame.BackgroundColor3 = Themes[self.CurrentTheme].ButtonColor
+        button.Frame.BorderSizePixel = 0
+        button.Frame.ZIndex = 12
+        button.Frame.Parent = self.Content
+        
+        Utilities.CreateCorner(button.Frame, DEFAULT_CORNER_RADIUS - 2)
+        
+        button.Outline = Utilities.CreateOutline(button.Frame, 2, Themes[self.CurrentTheme].OutlineColor, 0.5)
+        
+        button.Text = Instance.new("TextLabel")
+        button.Text.Name = "ButtonText"
+        button.Text.Size = UDim2.new(1, 0, 1, 0)
+        button.Text.BackgroundTransparency = 1
+        button.Text.Text = text
+        button.Text.Font = Enum.Font.Gotham
+        button.Text.TextSize = 14
+        button.Text.TextColor3 = Themes[self.CurrentTheme].TextColor
+        button.Text.ZIndex = 13
+        button.Text.Parent = button.Frame
+        
+        button.Frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                local sizeTween = TweenService:Create(button.Frame, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -24, 0, 34), Position = UDim2.new(0, 12, 0, button.Frame.Position.Y.Offset + 1)})
+                sizeTween:Play()
+                
+                Utilities.CreateRipple(button.Frame, Themes[self.CurrentTheme].AccentColor)(input)
+                
+                Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), button.Frame, 10, Themes[self.CurrentTheme].AccentColor)
+                
+                if callback then
+                    callback()
+                end
+            end
+        end)
+        
+        button.Frame.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                local sizeTween = TweenService:Create(button.Frame, TweenInfo.new(0.1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -20, 0, 36), Position = UDim2.new(0, 10, 0, button.Frame.Position.Y.Offset - 1)})
+                sizeTween:Play()
+            end
+        end)
+        
+        button.Frame.MouseEnter:Connect(function()
+            local colorTween = AnimationPresets.Color(button.Frame, Themes[self.CurrentTheme].AccentColor)
+            local textTween = AnimationPresets.TextColor(button.Text, Color3.new(1, 1, 1))
+            colorTween:Play()
+            textTween:Play()
+            
+            Utilities.WobbleEffect(button.Frame, 1, 0.5)
+        end)
+        
+        button.Frame.MouseLeave:Connect(function()
+            local colorTween = AnimationPresets.Color(button.Frame, Themes[self.CurrentTheme].ButtonColor)
+            local textTween = AnimationPresets.TextColor(button.Text, Themes[self.CurrentTheme].TextColor)
+            colorTween:Play()
+            textTween:Play()
+        end)
+        
+        function button:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local colorTween = AnimationPresets.Color(self.Frame, themeTable.ButtonColor)
+            local textTween = AnimationPresets.TextColor(self.Text, themeTable.TextColor)
+            local outlineTween = AnimationPresets.BorderColor(self.Outline, themeTable.OutlineColor)
+            
+            colorTween:Play()
+            textTween:Play()
+            outlineTween:Play()
+        end
+        
+        table.insert(self.Elements, button)
+        
+        return button
+    end
+    
+    function window:AddToggle(text, callback, premiumOnly)
+        local toggle = {}
+        toggle.PremiumOnly = premiumOnly or false
+        
+        toggle.Frame = Instance.new("Frame")
+        toggle.Frame.Name = text .. "Toggle"
+        toggle.Frame.Size = UDim2.new(1, -20, 0, 36)
+        toggle.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        toggle.Frame.BackgroundColor3 = Themes[self.CurrentTheme].SecondaryBackgroundColor
+        toggle.Frame.BorderSizePixel = 0
+        toggle.Frame.ZIndex = 12
+        toggle.Frame.Parent = self.Content
+        
+        Utilities.CreateCorner(toggle.Frame, DEFAULT_CORNER_RADIUS - 2)
+        
+        toggle.Outline = Utilities.CreateOutline(toggle.Frame, 1, Themes[self.CurrentTheme].OutlineColor, 0.3)
+        
+        toggle.Text = Instance.new("TextLabel")
+        toggle.Text.Name = "ToggleText"
+        toggle.Text.Size = UDim2.new(0, 0, 1, 0)
+        toggle.Text.Size = UDim2.new(1, -50, 1, 0)
+        toggle.Text.Position = UDim2.new(0, 10, 0, 0)
+        toggle.Text.BackgroundTransparency = 1
+        toggle.Text.Text = text
+        toggle.Text.Font = Enum.Font.Gotham
+        toggle.Text.TextSize = 14
+        toggle.Text.TextColor3 = Themes[self.CurrentTheme].TextColor
+        toggle.Text.TextXAlignment = Enum.TextXAlignment.Left
+        toggle.Text.ZIndex = 13
+        toggle.Text.Parent = toggle.Frame
+        
+        toggle.Box = Instance.new("Frame")
+        toggle.Box.Name = "ToggleBox"
+        toggle.Box.Size = UDim2.new(0, 40, 0, 20)
+        toggle.Box.Position = UDim2.new(1, -50, 0.5, -10)
+        toggle.Box.BackgroundColor3 = Themes[self.CurrentTheme].ToggleOffColor
+        toggle.Box.BorderSizePixel = 0
+        toggle.Box.ZIndex = 13
+        toggle.Box.Parent = toggle.Frame
+        
+        Utilities.CreateCorner(toggle.Box, 10)
+        
+        toggle.Knob = Instance.new("Frame")
+        toggle.Knob.Name = "ToggleKnob"
+        toggle.Knob.Size = UDim2.new(0, 16, 0, 16)
+        toggle.Knob.Position = UDim2.new(0, 2, 0.5, -8)
+        toggle.Knob.BackgroundColor3 = Color3.new(1, 1, 1)
+        toggle.Knob.BorderSizePixel = 0
+        toggle.Knob.ZIndex = 14
+        toggle.Knob.Parent = toggle.Box
+        
+        Utilities.CreateCorner(toggle.Knob, 8)
+        
+        toggle.State = false
+        
+        toggle.Frame.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                toggle:Toggle()
+                
+                Utilities.CreateRipple(toggle.Frame, Themes[self.CurrentTheme].AccentColor)(input)
+                
+                if callback then
+                    callback(toggle.State)
+                end
+            end
+        end)
+        
+        function toggle:Toggle()
+            self.State = not self.State
+            
+            if self.State then
+                local boxColorTween = AnimationPresets.Color(self.Box, Themes[self.CurrentTheme].ToggleOnColor)
+                local knobPositionTween = AnimationPresets.Position(self.Knob, UDim2.new(1, -18, 0.5, -8))
+                
+                boxColorTween:Play()
+                knobPositionTween:Play()
+                
+                Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), self.Box, 8, Themes[self.CurrentTheme].ToggleOnColor)
+            else
+                local boxColorTween = AnimationPresets.Color(self.Box, Themes[self.CurrentTheme].ToggleOffColor)
+                local knobPositionTween = AnimationPresets.Position(self.Knob, UDim2.new(0, 2, 0.5, -8))
+                
+                boxColorTween:Play()
+                knobPositionTween:Play()
+            end
+        end
+        
+        toggle.Frame.MouseEnter:Connect(function()
+            local colorTween = AnimationPresets.Color(toggle.Frame, Themes[self.CurrentTheme].ButtonColor)
+            colorTween:Play()
+            
+            Utilities.WobbleEffect(toggle.Knob, 1, 0.5)
+        end)
+        
+        toggle.Frame.MouseLeave:Connect(function()
+            local colorTween = AnimationPresets.Color(toggle.Frame, Themes[self.CurrentTheme].SecondaryBackgroundColor)
+            colorTween:Play()
+        end)
+        
+        function toggle:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local frameTween = AnimationPresets.Color(self.Frame, themeTable.SecondaryBackgroundColor)
+            local textTween = AnimationPresets.TextColor(self.Text, themeTable.TextColor)
+            local outlineTween = AnimationPresets.BorderColor(self.Outline, themeTable.OutlineColor)
+            
+            local boxTween
+            if self.State then
+                boxTween = AnimationPresets.Color(self.Box, themeTable.ToggleOnColor)
+            else
+                boxTween = AnimationPresets.Color(self.Box, themeTable.ToggleOffColor)
+            end
+            
+            frameTween:Play()
+            textTween:Play()
+            outlineTween:Play()
+            boxTween:Play()
+        end
+        
+        table.insert(self.Elements, toggle)
+        
+        return toggle
+    end
+    
+    function window:AddSlider(text, min, max, default, callback)
+        local slider = {}
+        
+        min = min or 0
+        max = max or 100
+        default = default or min
+        
+        slider.Frame = Instance.new("Frame")
+        slider.Frame.Name = text .. "Slider"
+        slider.Frame.Size = UDim2.new(1, -20, 0, 50)
+        slider.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        slider.Frame.BackgroundColor3 = Themes[self.CurrentTheme].SecondaryBackgroundColor
+        slider.Frame.BorderSizePixel = 0
+        slider.Frame.ZIndex = 12
+        slider.Frame.Parent = self.Content
+        
+        Utilities.CreateCorner(slider.Frame, DEFAULT_CORNER_RADIUS - 2)
+        
+        slider.Outline = Utilities.CreateOutline(slider.Frame, 1, Themes[self.CurrentTheme].OutlineColor, 0.3)
+        
+        slider.Text = Instance.new("TextLabel")
+        slider.Text.Name = "SliderText"
+        slider.Text.Size = UDim2.new(1, -10, 0, 20)
+        slider.Text.Position = UDim2.new(0, 10, 0, 5)
+        slider.Text.BackgroundTransparency = 1
+        slider.Text.Text = text
+        slider.Text.Font = Enum.Font.Gotham
+        slider.Text.TextSize = 14
+        slider.Text.TextColor3 = Themes[self.CurrentTheme].TextColor
+        slider.Text.TextXAlignment = Enum.TextXAlignment.Left
+        slider.Text.ZIndex = 13
+        slider.Text.Parent = slider.Frame
+        
+        slider.Value = Instance.new("TextLabel")
+        slider.Value.Name = "ValueText"
+        slider.Value.Size = UDim2.new(0, 50, 0, 20)
+        slider.Value.Position = UDim2.new(1, -60, 0, 5)
+        slider.Value.BackgroundTransparency = 1
+        slider.Value.Text = tostring(default)
+        slider.Value.Font = Enum.Font.Gotham
+        slider.Value.TextSize = 14
+        slider.Value.TextColor3 = Themes[self.CurrentTheme].AccentColor
+        slider.Value.TextXAlignment = Enum.TextXAlignment.Right
+        slider.Value.ZIndex = 13
+        slider.Value.Parent = slider.Frame
+        
+        slider.Track = Instance.new("Frame")
+        slider.Track.Name = "SliderTrack"
+        slider.Track.Size = UDim2.new(1, -20, 0, 6)
+        slider.Track.Position = UDim2.new(0, 10, 0, 30)
+        slider.Track.BackgroundColor3 = Themes[self.CurrentTheme].ButtonColor
+        slider.Track.BorderSizePixel = 0
+        slider.Track.ZIndex = 13
+        slider.Track.Parent = slider.Frame
+        
+        Utilities.CreateCorner(slider.Track, 3)
+        
+        slider.Fill = Instance.new("Frame")
+        slider.Fill.Name = "SliderFill"
+        slider.Fill.Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+        slider.Fill.Position = UDim2.new(0, 0, 0, 0)
+        slider.Fill.BackgroundColor3 = Themes[self.CurrentTheme].AccentColor
+        slider.Fill.BorderSizePixel = 0
+        slider.Fill.ZIndex = 14
+        slider.Fill.Parent = slider.Track
+        
+        Utilities.CreateCorner(slider.Fill, 3)
+        
+        slider.Knob = Instance.new("Frame")
+        slider.Knob.Name = "SliderKnob"
+        slider.Knob.Size = UDim2.new(0, 16, 0, 16)
+        slider.Knob.Position = UDim2.new((default - min) / (max - min), -8, 0.5, -8)
+        slider.Knob.BackgroundColor3 = Color3.new(1, 1, 1)
+        slider.Knob.BorderSizePixel = 0
+        slider.Knob.ZIndex = 15
+        slider.Knob.Parent = slider.Track
+        
+        Utilities.CreateCorner(slider.Knob, 8)
+        
+        Utilities.CreateShadow(slider.Knob, 6, 0.4)
+        
+        slider.CurrentValue = default
+        
+        local isDragging = false
+        
+        local function updateSlider(input)
+            local pos = input.Position.X
+            local trackStart = slider.Track.AbsolutePosition.X
+            local trackWidth = slider.Track.AbsoluteSize.X
+            
+            local percentage = math.clamp((pos - trackStart) / trackWidth, 0, 1)
+            local value = min + (max - min) * percentage
+            
+            if math.floor(min) == min and math.floor(max) == max then
+                value = math.floor(value + 0.5)
+            else
+                value = math.floor(value * 100 + 0.5) / 100
+            end
+            
+            slider.CurrentValue = value
+            slider.Value.Text = tostring(value)
+            
+            local fillTween = AnimationPresets.Scale(slider.Fill, UDim2.new(percentage, 0, 1, 0), 0.1)
+            local knobTween = AnimationPresets.Position(slider.Knob, UDim2.new(percentage, -8, 0.5, -8), 0.1)
+            
+            fillTween:Play()
+            knobTween:Play()
+            
+            if callback then
+                callback(value)
+            end
+        end
+        
+        slider.Track.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                isDragging = true
+                updateSlider(input)
+                
+                Utilities.WobbleEffect(slider.Knob, 1.5, 0.5)
+                
+                Utilities.CreateRipple(slider.Track, Themes[self.CurrentTheme].AccentColor)(input)
+            end
+        end)
+        
+        slider.Knob.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                isDragging = true
+                
+                Utilities.WobbleEffect(slider.Knob, 1.5, 0.5)
+            end
+        end)
+        
+        UserInputService.InputChanged:Connect(function(input)
+            if isDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                updateSlider(input)
+            end
+        end)
+        
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                if isDragging then
+                    isDragging = false
+                    
+                    Utilities.ParticleBurst(UDim2.new(slider.Knob.Position.X.Scale, 0, 0.5, 0), slider.Track, 5, Themes[self.CurrentTheme].AccentColor)
+                end
+            end
+        end)
+        
+        slider.Track.MouseEnter:Connect(function()
+            local colorTween = AnimationPresets.Color(slider.Knob, Themes[self.CurrentTheme].AccentColor)
+            colorTween:Play()
+            
+            Utilities.PulsingGlow(slider.Knob, Themes[self.CurrentTheme].AccentColor, 0.5)
+        end)
+        
+        slider.Track.MouseLeave:Connect(function()
+            local colorTween = AnimationPresets.Color(slider.Knob, Color3.new(1, 1, 1))
+            colorTween:Play()
+            
+            local glow = slider.Knob:FindFirstChild("GlowEffect")
+            if glow then glow:Destroy() end
+        end)
+        
+        function slider:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local frameTween = AnimationPresets.Color(self.Frame, themeTable.SecondaryBackgroundColor)
+            local textTween = AnimationPresets.TextColor(self.Text, themeTable.TextColor)
+            local valueTween = AnimationPresets.TextColor(self.Value, themeTable.AccentColor)
+            local trackTween = AnimationPresets.Color(self.Track, themeTable.ButtonColor)
+            local fillTween = AnimationPresets.Color(self.Fill, themeTable.AccentColor)
+            local outlineTween = AnimationPresets.BorderColor(self.Outline, themeTable.OutlineColor)
+            
+            frameTween:Play()
+            textTween:Play()
+            valueTween:Play()
+            trackTween:Play()
+            fillTween:Play()
+            outlineTween:Play()
+        end
+        
+        function slider:SetValue(value)
+            value = math.clamp(value, min, max)
+            local percentage = (value - min) / (max - min)
+            
+            self.CurrentValue = value
+            self.Value.Text = tostring(value)
+            
+            local fillTween = AnimationPresets.Scale(self.Fill, UDim2.new(percentage, 0, 1, 0), 0.3)
+            local knobTween = AnimationPresets.Position(self.Knob, UDim2.new(percentage, -8, 0.5, -8), 0.3)
+            
+            fillTween:Play()
+            knobTween:Play()
+            
+            Utilities.WobbleEffect(self.Knob, 1, 0.5)
+            
+            if callback then
+                callback(value)
+            end
+        end
+        
+        table.insert(self.Elements, slider)
+        
+        return slider
+    end
+    
+    function window:AddSection(title, backgroundColor, textColor)
+        local section = {}
+        
+        section.Frame = Instance.new("Frame")
+        section.Frame.Name = "Section"
+        section.Frame.Size = UDim2.new(1, -20, 0, 40) 
+        section.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        section.Frame.BackgroundColor3 = backgroundColor or Themes[self.CurrentTheme].SecondaryBackgroundColor
+        section.Frame.BorderSizePixel = 0
+        section.Frame.ZIndex = 12
+        section.Frame.Parent = self.Content
+        
+        Utilities.CreateCorner(section.Frame, DEFAULT_CORNER_RADIUS)
+        
+        section.Outline = Utilities.CreateOutline(section.Frame, 2, Themes[self.CurrentTheme].OutlineColor, 0.4)
+        
+        section.RainbowOutline = false
+        
+        section.Header = Instance.new("Frame")
+        section.Header.Name = "Header"
+        section.Header.Size = UDim2.new(1, 0, 0, 30)
+        section.Header.BackgroundColor3 = Themes[self.CurrentTheme].AccentColor
+        section.Header.BorderSizePixel = 0
+        section.Header.ZIndex = 13
+        section.Header.Parent = section.Frame
+        
+        local headerCorner = Instance.new("UICorner")
+        headerCorner.CornerRadius = UDim.new(0, DEFAULT_CORNER_RADIUS)
+        headerCorner.Parent = section.Header
+        
+        section.Title = Instance.new("TextLabel")
+        section.Title.Name = "Title"
+        section.Title.Size = UDim2.new(1, -20, 1, 0)
+        section.Title.Position = UDim2.new(0, 10, 0, 0)
+        section.Title.BackgroundTransparency = 1
+        section.Title.Text = title or "Section"
+        section.Title.Font = Enum.Font.GothamBold
+        section.Title.TextSize = 14
+        section.Title.TextColor3 = textColor or Color3.new(1, 1, 1)
+        section.Title.TextXAlignment = Enum.TextXAlignment.Left
+        section.Title.ZIndex = 14
+        section.Title.Parent = section.Header
+        
+        section.Container = Instance.new("Frame")
+        section.Container.Name = "Container"
+        section.Container.Size = UDim2.new(1, -20, 0, 0) 
+        section.Container.Position = UDim2.new(0, 10, 0, 40)
+        section.Container.BackgroundTransparency = 1
+        section.Container.ZIndex = 13
+        section.Container.Parent = section.Frame
+        
+        section.Elements = {}
+        
+        function section:AddElement(element)
+            if not element or not element.Frame then return end
+            
+            local currentHeight = #self.Elements * 46 + 50
+            
+            element.Frame.Position = UDim2.new(0, 0, 0, #self.Elements * 46 + 10)
+            
+            element.Frame.Parent = self.Container
+            
+            table.insert(self.Elements, element)
+            
+            self.Container.Size = UDim2.new(1, -20, 0, #self.Elements * 46 + 10)
+            
+            local newHeight = 50 + #self.Elements * 46
+            local sizeTween = TweenService:Create(
+                self.Frame, 
+                TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), 
+                {Size = UDim2.new(1, -20, 0, newHeight)}
+            )
+            sizeTween:Play()
+            
+            Utilities.ParticleBurst(UDim2.new(0.5, 0, 1, -10), self.Frame, 3, Themes[self.CurrentTheme].AccentColor)
+            
+            return element
+        end
+        
+        function section:AddLabel(text)
+            return self:AddElement(window:AddLabel(text))
+        end
+        
+        function section:AddButton(text, callback)
+            return self:AddElement(window:AddButton(text, callback))
+        end
+        
+        function section:AddToggle(text, callback)
+            return self:AddElement(window:AddToggle(text, callback))
+        end
+        
+        function section:AddSlider(text, min, max, default, callback)
+            return self:AddElement(window:AddSlider(text, min, max, default, callback))
+        end
+        
+        function section:AddDropdown(text, options, callback)
+            return self:AddElement(window:AddDropdown(text, options, callback))
+        end
+        
+        function section:AddTextBox(text, placeholder, callback)
+            return self:AddElement(window:AddTextBox(text, placeholder, callback))
+        end
+        
+        function section:AddColorPicker(text, default, callback)
+            return self:AddElement(window:AddColorPicker(text, default, callback))
+        end
+        
+        function section:AddParagraph(title, content, titleColor, contentColor)
+            return self:AddElement(window:AddParagraph(title, content, titleColor, contentColor))
+        end
+        
+        function section:EnableRainbowOutline(enabled)
+            self.RainbowOutline = enabled
+            
+            if enabled then
+                spawn(function()
+                    local hue = 0
+                    
+                    while self.RainbowOutline and self.Frame and self.Frame.Parent do
+                        hue = (hue + 1) % 360
+                        local color = Color3.fromHSV(hue/360, 1, 1)
+                        
+                        if self.Outline then
+                            local colorTween = TweenService:Create(
+                                self.Outline, 
+                                TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
+                                {Color = color}
+                            )
+                            colorTween:Play()
+                        end
+                        
+                        wait(0.03) 
+                    end
+                end)
+            end
+        end
+        
+        function section:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local frameTween = AnimationPresets.Color(self.Frame, themeTable.SecondaryBackgroundColor)
+            local headerTween = AnimationPresets.Color(self.Header, themeTable.AccentColor)
+            
+            frameTween:Play()
+            headerTween:Play()
+            
+            if not self.RainbowOutline and self.Outline then
+                local outlineTween = TweenService:Create(self.Outline, TweenInfo.new(0.5), {Color = themeTable.OutlineColor})
+                outlineTween:Play()
+            end
+            
+            for _, element in ipairs(self.Elements) do
+                if element.UpdateTheme then
+                    element:UpdateTheme(theme)
+                end
+            end
+        end
+        
+        section.Header.MouseEnter:Connect(function()
+            local colorTween = AnimationPresets.Color(section.Header, Color3.fromRGB(
+                math.min(255, Themes[self.CurrentTheme].AccentColor.R * 255 * 1.1),
+                math.min(255, Themes[self.CurrentTheme].AccentColor.G * 255 * 1.1),
+                math.min(255, Themes[self.CurrentTheme].AccentColor.B * 255 * 1.1)
+            ))
+            colorTween:Play()
+            
+            Utilities.WobbleEffect(section.Frame, 0.5, 0.3)
+        end)
+        
+        section.Header.MouseLeave:Connect(function()
+            local colorTween = AnimationPresets.Color(section.Header, Themes[self.CurrentTheme].AccentColor)
+            colorTween:Play()
+        end)
+        
+        section.Frame.Size = UDim2.new(0, 0, 0, 0)
+        local startPos = section.Frame.Position
+        section.Frame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        
+        local sizeTween = TweenService:Create(
+            section.Frame, 
+            TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), 
+            {Size = UDim2.new(1, -20, 0, 40)}
+        )
+        
+        local posTween = TweenService:Create(
+            section.Frame, 
+            TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), 
+            {Position = startPos}
+        )
+        
+        sizeTween:Play()
+        posTween:Play()
+        
+        spawn(function()
+            wait(0.2)
+            Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), section.Frame, 10, Themes[self.CurrentTheme].AccentColor)
+        end)
+        
+        table.insert(self.Elements, section)
+        
+        return section
+    end
+
+    function window:AddDropdown(text, options, callback)
+        local dropdown = {}
+        
+        options = options or {}
+        
+        dropdown.Frame = Instance.new("Frame")
+        dropdown.Frame.Name = text .. "Dropdown"
+        dropdown.Frame.Size = UDim2.new(1, -20, 0, 36)
+        dropdown.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        dropdown.Frame.BackgroundColor3 = Themes[self.CurrentTheme].SecondaryBackgroundColor
+        dropdown.Frame.BorderSizePixel = 0
+        dropdown.Frame.ZIndex = 12
+        dropdown.Frame.ClipsDescendants = true
+        dropdown.Frame.Parent = self.Content
+        
+        Utilities.CreateCorner(dropdown.Frame, DEFAULT_CORNER_RADIUS - 2)
+        
+        dropdown.Outline = Utilities.CreateOutline(dropdown.Frame, 1, Themes[self.CurrentTheme].OutlineColor, 0.3)
+        
+        dropdown.Header = Instance.new("Frame")
+        dropdown.Header.Name = "DropdownHeader"
+        dropdown.Header.Size = UDim2.new(1, 0, 0, 36)
+        dropdown.Header.Position = UDim2.new(0, 0, 0, 0)
+        dropdown.Header.BackgroundColor3 = Themes[self.CurrentTheme].ButtonColor
+        dropdown.Header.BorderSizePixel = 0
+        dropdown.Header.ZIndex = 13
+        dropdown.Header.Parent = dropdown.Frame
+        
+        Utilities.CreateCorner(dropdown.Header, DEFAULT_CORNER_RADIUS - 2)
+        
+        dropdown.Text = Instance.new("TextLabel")
+        dropdown.Text.Name = "DropdownText"
+        dropdown.Text.Size = UDim2.new(1, -30, 1, 0)
+        dropdown.Text.Position = UDim2.new(0, 10, 0, 0)
+        dropdown.Text.BackgroundTransparency = 1
+        dropdown.Text.Text = text
+        dropdown.Text.Font = Enum.Font.Gotham
+        dropdown.Text.TextSize = 14
+        dropdown.Text.TextColor3 = Themes[self.CurrentTheme].TextColor
+        dropdown.Text.TextXAlignment = Enum.TextXAlignment.Left
+        dropdown.Text.ZIndex = 14
+        dropdown.Text.Parent = dropdown.Header
+        
+        dropdown.Selected = Instance.new("TextLabel")
+        dropdown.Selected.Name = "SelectedText"
+        dropdown.Selected.Size = UDim2.new(0, 100, 1, 0)
+        dropdown.Selected.Position = UDim2.new(1, -110, 0, 0)
+        dropdown.Selected.BackgroundTransparency = 1
+        dropdown.Selected.Text = options[1] or "Select..."
+        dropdown.Selected.Font = Enum.Font.Gotham
+        dropdown.Selected.TextSize = 14
+        dropdown.Selected.TextColor3 = Themes[self.CurrentTheme].AccentColor
+        dropdown.Selected.TextXAlignment = Enum.TextXAlignment.Right
+        dropdown.Selected.ZIndex = 14
+        dropdown.Selected.Parent = dropdown.Header
+        
+        dropdown.Arrow = Instance.new("ImageLabel")
+        dropdown.Arrow.Name = "Arrow"
+        dropdown.Arrow.Size = UDim2.new(0, 16, 0, 16)
+        dropdown.Arrow.Position = UDim2.new(1, -20, 0.5, -8)
+        dropdown.Arrow.BackgroundTransparency = 1
+        dropdown.Arrow.Image = "rbxassetid://6031091004"  
+        dropdown.Arrow.ImageColor3 = Themes[self.CurrentTheme].TextColor
+        dropdown.Arrow.ZIndex = 14
+        dropdown.Arrow.Parent = dropdown.Header
+        
+        dropdown.OptionsFrame = Instance.new("Frame")
+        dropdown.OptionsFrame.Name = "Options"
+        dropdown.OptionsFrame.Size = UDim2.new(1, 0, 0, 0)  
+        dropdown.OptionsFrame.Position = UDim2.new(0, 0, 0, 36)
+        dropdown.OptionsFrame.BackgroundColor3 = Themes[self.CurrentTheme].SecondaryBackgroundColor
+        dropdown.OptionsFrame.BorderSizePixel = 0
+        dropdown.OptionsFrame.ZIndex = 15
+        dropdown.OptionsFrame.Visible = false
+        dropdown.OptionsFrame.Parent = dropdown.Frame
+        
+        dropdown.IsOpen = false
+        dropdown.SelectedOption = options[1] or nil
+        
+        dropdown.OptionButtons = {}
+        
+        for i, option in ipairs(options) do
+            local optionButton = Instance.new("TextButton")
+            optionButton.Name = option .. "Option"
+            optionButton.Size = UDim2.new(1, 0, 0, 30)
+            optionButton.Position = UDim2.new(0, 0, 0, (i-1) * 30)
+            optionButton.BackgroundColor3 = Themes[self.CurrentTheme].SecondaryBackgroundColor
+            optionButton.BorderSizePixel = 0
+            optionButton.Text = option
+            optionButton.Font = Enum.Font.Gotham
+            optionButton.TextSize = 14
+            optionButton.TextColor3 = Themes[self.CurrentTheme].TextColor
+            optionButton.ZIndex = 16
+            optionButton.Parent = dropdown.OptionsFrame
+            
+            optionButton.MouseEnter:Connect(function()
+                local colorTween = AnimationPresets.Color(optionButton, Themes[self.CurrentTheme].ButtonColor)
+                colorTween:Play()
+                
+                Utilities.PulsingGlow(optionButton, Themes[self.CurrentTheme].AccentColor, 0.7)
+            end)
+            
+            optionButton.MouseLeave:Connect(function()
+                local colorTween = AnimationPresets.Color(optionButton, Themes[self.CurrentTheme].SecondaryBackgroundColor)
+                colorTween:Play()
+                
+                local glow = optionButton:FindFirstChild("GlowEffect")
+                if glow then glow:Destroy() end
+            end)
+            
+            optionButton.MouseButton1Click:Connect(function()
+                dropdown:Select(option)
+                
+                Utilities.CreateRipple(optionButton, Themes[self.CurrentTheme].AccentColor)({
+                    Position = Vector2.new(optionButton.AbsolutePosition.X + optionButton.AbsoluteSize.X/2, 
+                                          optionButton.AbsolutePosition.Y + optionButton.AbsoluteSize.Y/2)
+                })
+                
+                Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), optionButton, 5, Themes[self.CurrentTheme].AccentColor)
+            end)
+            
+            table.insert(dropdown.OptionButtons, optionButton)
+        end
+        
+        dropdown.OptionsFrame.Size = UDim2.new(1, 0, 0, #options * 30)
+        
+        function dropdown:Toggle()
+            self.IsOpen = not self.IsOpen
+            
+            if self.IsOpen then
+                self.OptionsFrame.Visible = true
+                
+                local sizeTween = TweenService:Create(self.Frame, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, -20, 0, 36 + #options * 30)})
+                local arrowTween = TweenService:Create(self.Arrow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Rotation = 180})
+                
+                sizeTween:Play()
+                arrowTween:Play()
+                
+                Utilities.ParticleBurst(UDim2.new(0.5, 0, 0, 36), self.Frame, 8, Themes[self.CurrentTheme].AccentColor)
+            else
+                local sizeTween = TweenService:Create(self.Frame, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {Size = UDim2.new(1, -20, 0, 36)})
+                local arrowTween = TweenService:Create(self.Arrow, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {Rotation = 0})
+                
+                sizeTween:Play()
+                arrowTween:Play()
+                
+                sizeTween.Completed:Connect(function()
+                    self.OptionsFrame.Visible = false
+                end)
+            end
+        end
+        
+        function dropdown:Select(option)
+            self.SelectedOption = option
+            self.Selected.Text = option
+            
+            Utilities.ParticleBurst(UDim2.new(1, -60, 0.5, 0), self.Header, 5, Themes[self.CurrentTheme].AccentColor)
+            
+            self:Toggle()
+            
+            if callback then
+                callback(option)
+            end
+        end
+        
+        dropdown.Header.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                dropdown:Toggle()
+                
+                Utilities.CreateRipple(dropdown.Header, Themes[self.CurrentTheme].AccentColor)(input)
+                
+                Utilities.WobbleEffect(dropdown.Header, 1, 0.5)
+            end
+        end)
+        
+        dropdown.Header.MouseEnter:Connect(function()
+            local colorTween = AnimationPresets.Color(dropdown.Header, Themes[self.CurrentTheme].AccentColor)
+            local textTween = AnimationPresets.TextColor(dropdown.Text, Color3.new(1, 1, 1))
+            local arrowTween = AnimationPresets.ImageColor(dropdown.Arrow, Color3.new(1, 1, 1))
+            
+            colorTween:Play()
+            textTween:Play()
+            arrowTween:Play()
+            
+            Utilities.PulsingGlow(dropdown.Header, Color3.new(1, 1, 1), 0.5)
+        end)
+        
+        dropdown.Header.MouseLeave:Connect(function()
+            local colorTween = AnimationPresets.Color(dropdown.Header, Themes[self.CurrentTheme].ButtonColor)
+            local textTween = AnimationPresets.TextColor(dropdown.Text, Themes[self.CurrentTheme].TextColor)
+            local arrowTween = AnimationPresets.ImageColor(dropdown.Arrow, Themes[self.CurrentTheme].TextColor)
+            
+            colorTween:Play()
+            textTween:Play()
+            arrowTween:Play()
+            
+            local glow = dropdown.Header:FindFirstChild("GlowEffect")
+            if glow then glow:Destroy() end
+        end)
+        
+        function dropdown:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local frameTween = AnimationPresets.Color(self.Frame, themeTable.SecondaryBackgroundColor)
+            local headerTween = AnimationPresets.Color(self.Header, themeTable.ButtonColor)
+            local textTween = AnimationPresets.TextColor(self.Text, themeTable.TextColor)
+            local selectedTween = AnimationPresets.TextColor(self.Selected, themeTable.AccentColor)
+            local arrowTween = AnimationPresets.ImageColor(self.Arrow, themeTable.TextColor)
+            local optionsFrameTween = AnimationPresets.Color(self.OptionsFrame, themeTable.SecondaryBackgroundColor)
+            local outlineTween = AnimationPresets.BorderColor(self.Outline, themeTable.OutlineColor)
+            
+            frameTween:Play()
+            headerTween:Play()
+            textTween:Play()
+            selectedTween:Play()
+            arrowTween:Play()
+            optionsFrameTween:Play()
+            outlineTween:Play()
+            
+            for _, button in ipairs(self.OptionButtons) do
+                local buttonTween = AnimationPresets.Color(button, themeTable.SecondaryBackgroundColor)
+                local buttonTextTween = AnimationPresets.TextColor(button, themeTable.TextColor)
+                
+                buttonTween:Play()
+                buttonTextTween:Play()
+            end
+        end
+        
+        table.insert(self.Elements, dropdown)
+        
+        return dropdown
+    end
+    
+    function window:AddColorPicker(text, default, callback)
+        local colorPicker = {}
+        
+        default = default or Color3.new(1, 1, 1)
+        
+        colorPicker.Frame = Instance.new("Frame")
+        colorPicker.Frame.Name = text .. "ColorPicker"
+        colorPicker.Frame.Size = UDim2.new(1, -20, 0, 36)
+        colorPicker.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        colorPicker.Frame.BackgroundColor3 = Themes[self.CurrentTheme].SecondaryBackgroundColor
+        colorPicker.Frame.BorderSizePixel = 0
+        colorPicker.Frame.ZIndex = 12
+        colorPicker.Frame.ClipsDescendants = true
+        colorPicker.Frame.Parent = self.Content
+        
+        Utilities.CreateCorner(colorPicker.Frame, DEFAULT_CORNER_RADIUS - 2)
+        
+        colorPicker.Outline = Utilities.CreateOutline(colorPicker.Frame, 1, Themes[self.CurrentTheme].OutlineColor, 0.3)
+        
+        colorPicker.Text = Instance.new("TextLabel")
+        colorPicker.Text.Name = "ColorPickerText"
+        colorPicker.Text.Size = UDim2.new(1, -60, 1, 0)
+        colorPicker.Text.Position = UDim2.new(0, 10, 0, 0)
+        colorPicker.Text.BackgroundTransparency = 1
+        colorPicker.Text.Text = text
+        colorPicker.Text.Font = Enum.Font.Gotham
+        colorPicker.Text.TextSize = 14
+        colorPicker.Text.TextColor3 = Themes[self.CurrentTheme].TextColor
+        colorPicker.Text.TextXAlignment = Enum.TextXAlignment.Left
+        colorPicker.Text.ZIndex = 13
+        colorPicker.Text.Parent = colorPicker.Frame
+        
+        colorPicker.Display = Instance.new("Frame")
+        colorPicker.Display.Name = "ColorDisplay"
+        colorPicker.Display.Size = UDim2.new(0, 30, 0, 20)
+        colorPicker.Display.Position = UDim2.new(1, -45, 0.5, -10)
+        colorPicker.Display.BackgroundColor3 = default
+        colorPicker.Display.BorderSizePixel = 0
+        colorPicker.Display.ZIndex = 13
+        colorPicker.Display.Parent = colorPicker.Frame
+        
+        Utilities.CreateCorner(colorPicker.Display, 4)
+        
+        Utilities.PulsingGlow(colorPicker.Display, default)
+        
+        colorPicker.Color = default
+        colorPicker.IsOpen = false
+        
+        function colorPicker:SetColor(color)
+            self.Color = color
+            self.Display.BackgroundColor3 = color
+            
+            local glow = self.Display:FindFirstChild("GlowEffect")
+            if glow then
+                glow.Color = color
+            else
+                Utilities.PulsingGlow(self.Display, color)
+            end
+            
+            if callback then
+                callback(color)
+            end
+        end
+        
+        colorPicker.RainbowMode = false
+        colorPicker.RainbowConnection = nil
+        
+        function colorPicker:ToggleRainbow()
+            self.RainbowMode = not self.RainbowMode
+            
+            if self.RainbowMode then
+                self.RainbowConnection = Utilities.RainbowColorEffect(self.Display, "BackgroundColor3", 0.5)
+                
+                local glow = self.Display:FindFirstChild("GlowEffect")
+                if glow then
+                    Utilities.RainbowColorEffect(glow, "Color", 0.5)
+                end
+            else
+                if self.RainbowConnection then
+                    self.RainbowConnection:Disconnect()
+                    self.RainbowConnection = nil
+                end
+                
+                self:SetColor(self.Color)
+            end
+        end
+        
+        colorPicker.Display.InputBegan:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                Utilities.CreateRipple(colorPicker.Frame, Themes[self.CurrentTheme].AccentColor)(input)
+                
+                colorPicker:ToggleRainbow()
+                
+                Utilities.ParticleBurst(UDim2.new(1, -45, 0.5, 0), colorPicker.Frame, 10, colorPicker.Color)
+            end
+        end)
+        
+        colorPicker.Frame.MouseEnter:Connect(function()
+            local colorTween = AnimationPresets.Color(colorPicker.Frame, Themes[self.CurrentTheme].ButtonColor)
+            colorTween:Play()
+            
+            Utilities.WobbleEffect(colorPicker.Display, 1.5, 0.5)
+        end)
+        
+        colorPicker.Frame.MouseLeave:Connect(function()
+            local colorTween = AnimationPresets.Color(colorPicker.Frame, Themes[self.CurrentTheme].SecondaryBackgroundColor)
+            colorTween:Play()
+        end)
+        
+        function colorPicker:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local frameTween = AnimationPresets.Color(self.Frame, themeTable.SecondaryBackgroundColor)
+            local textTween = AnimationPresets.TextColor(self.Text, themeTable.TextColor)
+            local outlineTween = AnimationPresets.BorderColor(self.Outline, themeTable.OutlineColor)
+            
+            frameTween:Play()
+            textTween:Play()
+            outlineTween:Play()
+        end
+        
+        table.insert(self.Elements, colorPicker)
+        
+        return colorPicker
+    end
+    
+    function window:AddLabel(text)
+        local label = {}
+        
+        label.Frame = Instance.new("Frame")
+        label.Frame.Name = "Label"
+        label.Frame.Size = UDim2.new(1, -20, 0, 30)
+        label.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        label.Frame.BackgroundTransparency = 1
+        label.Frame.BorderSizePixel = 0
+        label.Frame.ZIndex = 12
+        label.Frame.Parent = self.Content
+        
+        label.Text = Instance.new("TextLabel")
+        label.Text.Name = "LabelText"
+        label.Text.Size = UDim2.new(1, 0, 1, 0)
+        label.Text.BackgroundTransparency = 1
+        label.Text.Text = text
+        label.Text.Font = Enum.Font.GothamSemibold
+        label.Text.TextSize = 14
+        label.Text.TextColor3 = Themes[self.CurrentTheme].TextColor
+        label.Text.ZIndex = 13
+        label.Text.Parent = label.Frame
+        
+        label.Text.Text = ""
+        spawn(function()
+            for i = 1, #text do
+                label.Text.Text = string.sub(text, 1, i)
+                wait(0.01) 
+            end
+        end)
+        
+        function label:SetText(newText)
+            local oldText = self.Text.Text
+            self.Text.Text = ""
+            
+            spawn(function()
+                for i = 1, #newText do
+                    self.Text.Text = string.sub(newText, 1, i)
+                    wait(0.01) 
+                end
+            end)
+        end
+        
+        function label:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local textTween = AnimationPresets.TextColor(self.Text, themeTable.TextColor)
+            textTween:Play()
+        end
+        
+        table.insert(self.Elements, label)
+        
+        return label
+    end
+    
+    function window:AddParagraph(title, content, titleColor, contentColor)
+        local paragraph = {}
+        
+        paragraph.Frame = Instance.new("Frame")
+        paragraph.Frame.Name = "Paragraph"
+        paragraph.Frame.Size = UDim2.new(1, -20, 0, 0) 
+        paragraph.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        paragraph.Frame.BackgroundColor3 = Themes[self.CurrentTheme].SecondaryBackgroundColor
+        paragraph.Frame.BorderSizePixel = 0
+        paragraph.Frame.ZIndex = 12
+        paragraph.Frame.Parent = self.Content
+        
+        Utilities.CreateCorner(paragraph.Frame, DEFAULT_CORNER_RADIUS - 2)
+        
+        paragraph.Outline = Utilities.CreateOutline(paragraph.Frame, 1, Themes[self.CurrentTheme].OutlineColor, 0.3)
+        Utilities.PulsingGlow(paragraph.Frame, Themes[self.CurrentTheme].OutlineColor, 0.2)
+        
+        paragraph.Title = Instance.new("TextLabel")
+        paragraph.Title.Name = "Title"
+        paragraph.Title.Size = UDim2.new(1, -20, 0, 30)
+        paragraph.Title.Position = UDim2.new(0, 10, 0, 5)
+        paragraph.Title.BackgroundTransparency = 1
+        paragraph.Title.Text = title or "Paragraph"
+        paragraph.Title.Font = Enum.Font.GothamBold
+        paragraph.Title.TextSize = 16
+        paragraph.Title.TextColor3 = titleColor or Themes[self.CurrentTheme].AccentColor
+        paragraph.Title.TextXAlignment = Enum.TextXAlignment.Left
+        paragraph.Title.ZIndex = 13
+        paragraph.Title.Parent = paragraph.Frame
+        
+        paragraph.Content = Instance.new("TextLabel")
+        paragraph.Content.Name = "Content"
+        paragraph.Content.Size = UDim2.new(1, -20, 0, 0) 
+        paragraph.Content.Position = UDim2.new(0, 10, 0, 35)
+        paragraph.Content.BackgroundTransparency = 1
+        paragraph.Content.Text = content or ""
+        paragraph.Content.Font = Enum.Font.Gotham
+        paragraph.Content.TextSize = 14
+        paragraph.Content.TextColor3 = contentColor or Themes[self.CurrentTheme].TextColor
+        paragraph.Content.TextXAlignment = Enum.TextXAlignment.Left
+        paragraph.Content.TextYAlignment = Enum.TextYAlignment.Top
+        paragraph.Content.TextWrapped = true
+        paragraph.Content.ZIndex = 13
+        paragraph.Content.Parent = paragraph.Frame
+        
+        paragraph.Title.Text = ""
+        paragraph.Content.Text = ""
+        spawn(function()
+            for i = 1, #title do
+                paragraph.Title.Text = string.sub(title, 1, i)
+                wait(0.01)
+            end
+            
+            wait(0.2)
+            for i = 1, #content do
+                paragraph.Content.Text = string.sub(content, 1, i)
+                wait(0.005) 
+            end
+            
+            local textSize = game:GetService("TextService"):GetTextSize(
+                content,
+                paragraph.Content.TextSize,
+                paragraph.Content.Font,
+                Vector2.new(paragraph.Frame.AbsoluteSize.X - 20, 1000)
+            )
+            
+            local contentHeight = textSize.Y + 10
+            paragraph.Content.Size = UDim2.new(1, -20, 0, contentHeight)
+            
+            local frameHeight = 35 + contentHeight + 10
+            
+            local sizeTween = TweenService:Create(
+                paragraph.Frame, 
+                TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), 
+                {Size = UDim2.new(1, -20, 0, frameHeight)}
+            )
+            sizeTween:Play()
+            
+            Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), paragraph.Frame, 5, Themes[self.CurrentTheme].AccentColor)
+        end)
+        
+        paragraph.Frame.MouseEnter:Connect(function()
+            local colorTween = AnimationPresets.Color(paragraph.Frame, Themes[self.CurrentTheme].ButtonColor)
+            colorTween:Play()
+            
+            Utilities.WobbleEffect(paragraph.Frame, 0.8, 0.5)
+        end)
+        
+        paragraph.Frame.MouseLeave:Connect(function()
+            local colorTween = AnimationPresets.Color(paragraph.Frame, Themes[self.CurrentTheme].SecondaryBackgroundColor)
+            colorTween:Play()
+        end)
+        
+        function paragraph:SetContent(newTitle, newContent)
+            if newTitle then
+                self.Title.Text = newTitle
+            end
+            
+            if newContent then
+                self.Content.Text = newContent
+                
+                local textSize = game:GetService("TextService"):GetTextSize(
+                    newContent,
+                    self.Content.TextSize,
+                    self.Content.Font,
+                    Vector2.new(self.Frame.AbsoluteSize.X - 20, 1000)
+                )
+                
+                local contentHeight = textSize.Y + 10
+                self.Content.Size = UDim2.new(1, -20, 0, contentHeight)
+                
+                local frameHeight = 35 + contentHeight + 10
+                
+                local sizeTween = TweenService:Create(
+                    self.Frame, 
+                    TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), 
+                    {Size = UDim2.new(1, -20, 0, frameHeight)}
+                )
+                sizeTween:Play()
+            end
+        end
+        
+        function paragraph:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local frameTween = AnimationPresets.Color(self.Frame, themeTable.SecondaryBackgroundColor)
+            local titleTween = AnimationPresets.TextColor(self.Title, themeTable.AccentColor)
+            local contentTween = AnimationPresets.TextColor(self.Content, themeTable.TextColor)
+            
+            frameTween:Play()
+            titleTween:Play()
+            contentTween:Play()
+            
+            if self.Outline then
+                local outlineTween = TweenService:Create(self.Outline, TweenInfo.new(0.5), {Color = themeTable.OutlineColor})
+                outlineTween:Play()
+            end
+        end
+        
+        table.insert(self.Elements, paragraph)
+        
+        return paragraph
+    end
+    
+    function window:AddTextBox(text, placeholder, callback)
+        local textBox = {}
+        
+        textBox.Frame = Instance.new("Frame")
+        textBox.Frame.Name = text .. "TextBox"
+        textBox.Frame.Size = UDim2.new(1, -20, 0, 50)
+        textBox.Frame.Position = UDim2.new(0, 10, 0, #self.Elements * 46 + 10)
+        textBox.Frame.BackgroundColor3 = Themes[self.CurrentTheme].SecondaryBackgroundColor
+        textBox.Frame.BorderSizePixel = 0
+        textBox.Frame.ZIndex = 12
+        textBox.Frame.Parent = self.Content
+        
+        Utilities.CreateCorner(textBox.Frame, DEFAULT_CORNER_RADIUS - 2)
+        
+        textBox.Outline = Utilities.CreateOutline(textBox.Frame, 1, Themes[self.CurrentTheme].OutlineColor, 0.3)
+        
+        textBox.Label = Instance.new("TextLabel")
+        textBox.Label.Name = "TextBoxLabel"
+        textBox.Label.Size = UDim2.new(1, -10, 0, 20)
+        textBox.Label.Position = UDim2.new(0, 10, 0, 5)
+        textBox.Label.BackgroundTransparency = 1
+        textBox.Label.Text = text
+        textBox.Label.Font = Enum.Font.Gotham
+        textBox.Label.TextSize = 14
+        textBox.Label.TextColor3 = Themes[self.CurrentTheme].TextColor
+        textBox.Label.TextXAlignment = Enum.TextXAlignment.Left
+        textBox.Label.ZIndex = 13
+        textBox.Label.Parent = textBox.Frame
+        
+        textBox.Input = Instance.new("TextBox")
+        textBox.Input.Name = "InputBox"
+        textBox.Input.Size = UDim2.new(1, -20, 0, 24)
+        textBox.Input.Position = UDim2.new(0, 10, 0, 25)
+        textBox.Input.BackgroundColor3 = Themes[self.CurrentTheme].ButtonColor
+        textBox.Input.BorderSizePixel = 0
+        textBox.Input.PlaceholderText = placeholder or "Type here..."
+        textBox.Input.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
+        textBox.Input.Text = ""
+        textBox.Input.Font = Enum.Font.Gotham
+        textBox.Input.TextSize = 14
+        textBox.Input.TextColor3 = Themes[self.CurrentTheme].TextColor
+        textBox.Input.ZIndex = 13
+        textBox.Input.ClipsDescendants = true
+        textBox.Input.ClearTextOnFocus = false
+        textBox.Input.Parent = textBox.Frame
+        
+        Utilities.CreateCorner(textBox.Input, DEFAULT_CORNER_RADIUS - 4)
+        
+        local cursor = Instance.new("Frame")
+        cursor.Name = "Cursor"
+        cursor.Size = UDim2.new(0, 2, 0, 16)
+        cursor.BackgroundColor3 = Themes[self.CurrentTheme].TextColor
+        cursor.BorderSizePixel = 0
+        cursor.ZIndex = 14
+        cursor.Visible = false
+        cursor.Parent = textBox.Input
+        
+        textBox.Input.Focused:Connect(function()
+            local sizeTween = TweenService:Create(textBox.Input, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -16, 0, 28), Position = UDim2.new(0, 8, 0, 23)})
+            local colorTween = AnimationPresets.Color(textBox.Input, Themes[self.CurrentTheme].AccentColor)
+            local textColorTween = AnimationPresets.TextColor(textBox.Input, Color3.new(1, 1, 1))
+            
+            sizeTween:Play()
+            colorTween:Play()
+            textColorTween:Play()
+            
+            cursor.Visible = true
+            
+            local textSize = game:GetService("TextService"):GetTextSize(
+                textBox.Input.Text,
+                textBox.Input.TextSize,
+                textBox.Input.Font,
+                Vector2.new(1000, 1000)
+            )
+            
+            cursor.Position = UDim2.new(0, textSize.X + 5, 0.5, -8)
+            
+            spawn(function()
+                while cursor.Visible do
+                    cursor.BackgroundTransparency = 0
+                    wait(0.6)
+                    cursor.BackgroundTransparency = 1
+                    wait(0.6)
+                end
+            end)
+            
+            Utilities.PulsingGlow(textBox.Input, Themes[self.CurrentTheme].AccentColor, 0.5)
+        end)
+        
+        textBox.Input.FocusLost:Connect(function(enterPressed)
+            local sizeTween = TweenService:Create(textBox.Input, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = UDim2.new(1, -20, 0, 24), Position = UDim2.new(0, 10, 0, 25)})
+            local colorTween = AnimationPresets.Color(textBox.Input, Themes[self.CurrentTheme].ButtonColor)
+            local textColorTween = AnimationPresets.TextColor(textBox.Input, Themes[self.CurrentTheme].TextColor)
+            
+            sizeTween:Play()
+            colorTween:Play()
+            textColorTween:Play()
+            
+            cursor.Visible = false
+            
+            local glow = textBox.Input:FindFirstChild("GlowEffect")
+            if glow then glow:Destroy() end
+            
+            if enterPressed and callback then
+                callback(textBox.Input.Text)
+                
+                Utilities.ParticleBurst(UDim2.new(1, -20, 0.5, 0), textBox.Input, 5, Themes[self.CurrentTheme].AccentColor)
+            end
+        end)
+        
+        textBox.Input:GetPropertyChangedSignal("Text"):Connect(function()
+            local textSize = game:GetService("TextService"):GetTextSize(
+                textBox.Input.Text,
+                textBox.Input.TextSize,
+                textBox.Input.Font,
+                Vector2.new(1000, 1000)
+            )
+            
+            cursor.Position = UDim2.new(0, textSize.X + 5, 0.5, -8)
+            
+            Utilities.WobbleEffect(textBox.Input, 0.5, 0.2)
+        end)
+        
+        function textBox:UpdateTheme(theme)
+            local themeTable = Themes[theme]
+            if not themeTable then return end
+            
+            local frameTween = AnimationPresets.Color(self.Frame, themeTable.SecondaryBackgroundColor)
+            local labelTween = AnimationPresets.TextColor(self.Label, themeTable.TextColor)
+            local inputTween = AnimationPresets.Color(self.Input, themeTable.ButtonColor)
+            local inputTextTween = AnimationPresets.TextColor(self.Input, themeTable.TextColor)
+            local outlineTween = AnimationPresets.BorderColor(self.Outline, themeTable.OutlineColor)
+            
+            frameTween:Play()
+            labelTween:Play()
+            inputTween:Play()
+            inputTextTween:Play()
+            outlineTween:Play()
+            
+            cursor.BackgroundColor3 = themeTable.TextColor
+        end
+        
+        function textBox:SetText(value)
+            self.Input.Text = value
+        end
+        
+        function textBox:GetText()
+            return self.Input.Text
+        end
+        
+        table.insert(self.Elements, textBox)
+        
+        return textBox
+    end
+    
+    return window
+end
+
+
+function ZIvyer:SetTheme(themeName)
+    if not self.Themes[themeName] then
+        return
+    end
+    
+    self.CurrentTheme = themeName
+    
+    for _, window in ipairs(self.Windows) do
+        window:SetTheme(themeName)
+        
+        if window.DiamondButton then
+            local diamondTween = TweenService:Create(
+                window.DiamondButton,
+                TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                {ImageColor3 = self.Themes[themeName].AccentColor}
+            )
+            diamondTween:Play()
+            
+            if window.DiamondButton:FindFirstChild("Glow") then
+                local glowTween = TweenService:Create(
+                    window.DiamondButton.Glow,
+                    TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                    {ImageColor3 = self.Themes[themeName].AccentColor}
+                )
+                glowTween:Play()
+            end
+        end
+    end
+    
+    
+    for _, window in ipairs(self.Windows) do
+        Utilities.ParticleBurst(UDim2.new(0.5, 0, 0, 30), window.Frame, 15, self.Themes[themeName].AccentColor)
+    end
+    
+    local intro = self.ScreenGui:FindFirstChild("ZIvyerIntro")
+    if intro then
+        intro.BackgroundColor3 = self.Themes[themeName].BackgroundColor
+        
+        local logoContainer = intro:FindFirstChild("LogoContainer")
+        if logoContainer then
+            local colorTween = TweenService:Create(
+                logoContainer, 
+                TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                {BackgroundColor3 = self.Themes[themeName].AccentColor}
+            )
+            colorTween:Play()
+            
+            local loadingContainer = logoContainer:FindFirstChild("LoadingContainer")
+            if loadingContainer then
+                local loadingFill = loadingContainer:FindFirstChild("LoadingFill")
+                if loadingFill then
+                    local fillTween = TweenService:Create(
+                        loadingFill,
+                        TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                        {BackgroundColor3 = self.Themes[themeName].AccentColor}
+                    )
+                    fillTween:Play()
+                end
+            end
+            
+            for _, child in pairs(intro:GetChildren()) do
+                if child.Name:find("Particle") and child:IsA("Frame") then
+                    if child.BackgroundColor3 ~= Color3.new(1, 1, 1) then
+                        local particleTween = TweenService:Create(
+                            child,
+                            TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                            {BackgroundColor3 = self.Themes[themeName].AccentColor}
+                        )
+                        particleTween:Play()
+                        
+                        local glow = child:FindFirstChild("ParticleGlow")
+                        if glow then
+                            local glowTween = TweenService:Create(
+                                glow,
+                                TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                                {ImageColor3 = self.Themes[themeName].AccentColor}
+                            )
+                            glowTween:Play()
+                        end
+                    end
+                end
+            end
+        end
+    end
+    
+    if self.Themes[themeName].RobloxImageId then
+        for _, window in ipairs(self.Windows) do
+            local existingBg = window.Frame:FindFirstChild("ThemeBackgroundImage")
+            if existingBg then
+                existingBg:Destroy()
+            end
+            
+            local bgImage = Instance.new("ImageLabel")
+            bgImage.Name = "ThemeBackgroundImage"
+            bgImage.Size = UDim2.new(1, 0, 1, 0)
+            bgImage.Position = UDim2.new(0, 0, 0, 0)
+            bgImage.BackgroundTransparency = 1
+            bgImage.Image = "rbxassetid://" .. self.Themes[themeName].RobloxImageId
+            bgImage.ScaleType = Enum.ScaleType.Stretch
+            bgImage.ZIndex = window.Frame.ZIndex
+            bgImage.ImageTransparency = 0.7 
+            bgImage.Parent = window.Frame
+            
+            bgImage.ImageTransparency = 1
+            local fadeTween = TweenService:Create(
+                bgImage,
+                TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                {ImageTransparency = 0.7}
+            )
+            fadeTween:Play()
+        end
+    end
+end
+
+function ZIvyer:CreateTheme(name, themeTable)
+    self.Themes[name] = themeTable
+    return self.Themes[name]
+end
+
+function ZIvyer:CreateThemeFromRobloxId(name, robloxId, isImage)
+    if isImage then
+        local newTheme = {
+            RobloxImageId = robloxId,
+            BackgroundColor = Color3.fromRGB(30, 30, 35),
+            SecondaryBackgroundColor = Color3.fromRGB(40, 40, 45),
+            TextColor = Color3.fromRGB(240, 240, 240),
+            AccentColor = Color3.fromRGB(90, 140, 240),
+            ToggleOnColor = Color3.fromRGB(60, 200, 120),
+            ToggleOffColor = Color3.fromRGB(180, 180, 180),
+            OutlineColor = Color3.fromRGB(90, 140, 240),
+            ButtonColor = Color3.fromRGB(50, 50, 55),
+            ShadowColor = Color3.fromRGB(0, 0, 0),
+            BorderColor = Color3.fromRGB(60, 60, 65)
+        }
+        
+        self.Themes[name] = newTheme
+        
+        
+        return self.Themes[name]
+    else
+        local baseColor = Color3.fromRGB(90, 140, 240)  
+        
+        pcall(function()
+            if type(robloxId) == "string" and robloxId:find(",") then
+                local r, g, b = robloxId:match("(%d+),(%d+),(%d+)")
+                if r and g and b then
+                    baseColor = Color3.fromRGB(tonumber(r), tonumber(g), tonumber(b))
+                end
+            elseif type(robloxId) == "string" or type(robloxId) == "number" then
+                local success, brickColor = pcall(function() 
+                    return type(robloxId) == "string" and BrickColor.new(robloxId) or BrickColor.new(tonumber(robloxId))
+                end)
+                
+                if success then
+                    baseColor = brickColor.Color
+                end
+            elseif typeof(robloxId) == "Color3" then
+                baseColor = robloxId
+            end
+        end)
+        
+        local h, s, v = baseColor:ToHSV()
+        local darkColor = Color3.fromHSV(h, math.max(0, s - 0.2), math.max(0, v - 0.4))
+        local lightColor = Color3.fromHSV(h, math.min(1, s + 0.1), math.min(1, v + 0.2))
+        local accentColor = Color3.fromHSV((h + 0.5) % 1, s, v)
+        
+        local newTheme = {
+            BackgroundColor = darkColor,
+            SecondaryBackgroundColor = Color3.fromRGB(
+                math.floor(darkColor.R * 255) + 10,
+                math.floor(darkColor.G * 255) + 10,
+                math.floor(darkColor.B * 255) + 10
+            ),
+            TextColor = Color3.fromRGB(240, 240, 240),
+            AccentColor = baseColor,
+            ToggleOnColor = lightColor,
+            ToggleOffColor = Color3.fromRGB(180, 180, 180),
+            OutlineColor = baseColor,
+            ButtonColor = Color3.fromRGB(
+                math.floor(darkColor.R * 255) + 20,
+                math.floor(darkColor.G * 255) + 20,
+                math.floor(darkColor.B * 255) + 20
+            ),
+            ShadowColor = Color3.fromRGB(
+                math.floor(darkColor.R * 255) - 15,
+                math.floor(darkColor.G * 255) - 15,
+                math.floor(darkColor.B * 255) - 15
+            ),
+            BorderColor = Color3.fromRGB(
+                math.floor(baseColor.R * 255) - 30,
+                math.floor(baseColor.G * 255) - 30,
+                math.floor(baseColor.B * 255) - 30
+            )
+        }
+        
+        self.Themes[name] = newTheme
+        
+        return self.Themes[name]
+    end
+end
+
+function ZIvyer:ToggleUI()
+    self.Visible = not self.Visible
+    
+    for _, window in ipairs(self.Windows) do
+        if window.Frame then
+            if self.Visible then
+                window.Frame.Visible = true
+                
+                local sizeTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = window.DefaultSize})
+                local opacityTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0})
+                
+                sizeTween:Play()
+                opacityTween:Play()
+                
+                sizeTween.Completed:Connect(function()
+                    Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), window.Frame, 15, self.Themes[self.CurrentTheme].AccentColor)
+                end)
+            else
+                local sizeTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+                local opacityTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {BackgroundTransparency = 1})
+                
+                sizeTween:Play()
+                opacityTween:Play()
+                
+                sizeTween.Completed:Connect(function()
+                    window.Frame.Visible = false
+                end)
+            end
+        end
+    end
+end
+
+function ZIvyer:Destroy()
+    for _, window in ipairs(self.Windows) do
+        if window.Frame then
+            local sizeTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+            local positionTween = TweenService:Create(window.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(0.5, 0, 0.5, 0)})
+            
+            sizeTween:Play()
+            positionTween:Play()
+            
+            Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), window.Frame, 30, self.Themes[self.CurrentTheme].AccentColor)
+            
+            spawn(function()
+                wait(0.5)
+                window.Frame:Destroy()
+            end)
+        end
+    end
+    
+    spawn(function()
+        wait(0.6)
+        if self.ScreenGui then
+            self.ScreenGui:Destroy()
+        end
+        
+        self.Windows = {}
+        self.Initialized = false
+    end)
+end
+
+function ZIvyer:GetVersion()
+    return VERSION
+end
+
+function ZIvyer:SetupKeySystem(keys, maxAttempts)
+    if type(keys) == "string" then
+        self.ValidKeys = {keys}
+    elseif type(keys) == "table" then
+        self.ValidKeys = keys
+    end
+    
+    self.MaxKeyAttempts = maxAttempts or 5
+    
+    return self
+end
+
+function ZIvyer:ShowKeyWindow(customTitle, customMessage, onSuccess, onFailure, onTooManyAttempts, enablePremiumOnSuccess)
+    if #self.ValidKeys == 0 then
+        return false
+    end
+    
+    if enablePremiumOnSuccess == nil then
+        enablePremiumOnSuccess = true
+    end
+    
+    local title = customTitle or "ZIvyer Premium"
+    local message = customMessage or "Enter your key to unlock premium features."
+    
+    local keyWindow = self:CreateWindow(title, UDim2.new(0, 350, 0, 220))
+    
+    keyWindow:AddLabel(message)
+    
+    local statusText = "Enter your key below"
+    local statusLabel = keyWindow:AddLabel(statusText)
+    statusLabel.Text.TextColor3 = Color3.fromRGB(180, 180, 180)
+    
+    local keyBox = keyWindow:AddTextBox("Key", "Enter your key here...", function() end)
+    
+    local fancySection = keyWindow:AddSection("Premium Benefits")
+    fancySection:EnableRainbowOutline(true)
+    
+    fancySection:AddParagraph(
+        "Premium Features", 
+        "• Access exclusive tabs and features\n• Unlock premium themes\n• Get early access to new updates",
+        Color3.fromRGB(255, 215, 0)
+    )
+    
+    local submitButton = keyWindow:AddButton("Submit Key", function()
+        if self.KeyCheckCooldown then
+            statusLabel.Text.Text = "Please wait before trying again..."
+            return
+        end
+        
+        local keyInput = keyBox:GetText()
+        
+        self.KeyCheckCooldown = true
+        spawn(function()
+            wait(1)
+            self.KeyCheckCooldown = false
+        end)
+        
+        local keyValid = false
+        for _, validKey in ipairs(self.ValidKeys) do
+            if keyInput == validKey then
+                keyValid = true
+                break
+            end
+        end
+        
+        if keyValid then
+            local successTween = AnimationPresets.TextColor(statusLabel.Text, Color3.fromRGB(40, 200, 120))
+            statusLabel.Text.Text = "Key Verified! Unlocking premium features..."
+            successTween:Play()
+            
+            Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), keyWindow.Frame, 30, Color3.fromRGB(40, 200, 120))
+            
+            self.CurrentKey = keyInput
+            
+            if enablePremiumOnSuccess then
+                self.PremiumOnlyEnabled = true
+            end
+            
+            if onSuccess then
+                onSuccess()
+            end
+            
+            
+            spawn(function()
+                wait(1.5)
+                local sizeTween = TweenService:Create(keyWindow.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+                local posTween = TweenService:Create(keyWindow.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Position = UDim2.new(0.5, 0, 0.5, 0)})
+                
+                sizeTween:Play()
+                posTween:Play()
+                
+                sizeTween.Completed:Connect(function()
+                    keyWindow.Frame:Destroy()
+                    
+                    self:UpdatePremiumOnlyVisibility()
+                end)
+            end)
+        else
+            self.KeyAttempts = self.KeyAttempts + 1
+            
+            local failTween = AnimationPresets.TextColor(statusLabel.Text, Color3.fromRGB(200, 60, 60))
+            statusLabel.Text.Text = "Invalid key! Attempts remaining: " .. (self.MaxKeyAttempts - self.KeyAttempts)
+            failTween:Play()
+            
+            Utilities.WobbleEffect(keyBox.Frame, 2, 0.5)
+            
+            if self.KeyAttempts >= self.MaxKeyAttempts then
+                statusLabel.Text.Text = "Too many failed attempts. Please try again later."
+                keyBox.Input.Enabled = false
+                submitButton.Frame.BackgroundTransparency = 0.5
+                submitButton.Text.TextTransparency = 0.5
+                
+                if onTooManyAttempts then
+                    onTooManyAttempts()
+                end
+            else
+                if onFailure then
+                    onFailure(self.KeyAttempts, self.MaxKeyAttempts)
+                end
+            end
+        end
+    end)
+    
+    keyWindow:AddButton("Continue Without Key", function()
+        local sizeTween = TweenService:Create(keyWindow.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+        local posTween = TweenService:Create(keyWindow.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {Position = UDim2.new(0.5, 0, 0.5, 0)})
+        
+        sizeTween:Play()
+        posTween:Play()
+        
+        sizeTween.Completed:Connect(function()
+            keyWindow.Frame:Destroy()
+        end)
+    end)
+    
+    return keyWindow
+end
+
+function ZIvyer:IsPremiumOnly()
+    return self.PremiumOnlyEnabled
+end
+
+function ZIvyer:SetPremiumOnlyEnabled(enabled)
+    self.PremiumOnlyEnabled = enabled
+    self:UpdatePremiumOnlyVisibility()
+    return self
+end
+
+function ZIvyer:SetKey(key, enablePremiumOnly)
+    if enablePremiumOnly == nil then
+        enablePremiumOnly = true
+    end
+    
+    for _, validKey in ipairs(self.ValidKeys) do
+        if key == validKey then
+            self.CurrentKey = key
+            
+            if enablePremiumOnly then
+                self.PremiumOnlyEnabled = true
+                self:UpdatePremiumOnlyVisibility()
+            end
+            
+            return true
+        end
+    end
+    
+    return false
+end
+
+function ZIvyer:UpdatePremiumOnlyVisibility()
+    for _, window in ipairs(self.Windows) do
+        if window.PremiumOnly and not self.PremiumOnlyEnabled then
+            if window.Frame then
+                window.Frame.Visible = false
+            end
+        else
+            if window.Frame and window.IsVisible then
+                window.Frame.Visible = true
+            end
+        end
+        
+        for _, element in ipairs(window.Elements) do
+            if element.PremiumOnly then
+                if self.PremiumOnlyEnabled then
+                    if element.Frame then
+                        element.Frame.Visible = true
+                        
+                        local startTransparency = element.Frame.BackgroundTransparency
+                        element.Frame.BackgroundTransparency = 1
+                        
+                        local fadeTween = TweenService:Create(
+                            element.Frame, 
+                            TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), 
+                            {BackgroundTransparency = startTransparency}
+                        )
+                        fadeTween:Play()
+                        
+                        Utilities.ParticleBurst(UDim2.new(0.5, 0, 0.5, 0), element.Frame, 5, self.Themes[self.CurrentTheme].AccentColor)
+                    end
+                else
+                    if element.Frame then
+                        element.Frame.Visible = false
+                    end
+                end
+            end
+        end
+    end
+end
+
+function ZIvyer:ShowIntro(title, description)
+    local introFrame = Instance.new("Frame")
+    introFrame.Name = "ZIvyerIntro"
+    introFrame.Size = UDim2.new(1, 0, 1, 0)
+    introFrame.Position = UDim2.new(0, 0, 0, 0)
+    introFrame.BackgroundColor3 = self.Themes[self.CurrentTheme].BackgroundColor
+    introFrame.BackgroundTransparency = 0
+    introFrame.BorderSizePixel = 0
+    introFrame.ZIndex = 1000
+    
+    pcall(function()
+        introFrame.Parent = CoreGui
+    end)
+    
+    if introFrame.Parent == nil then
+        introFrame.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
+    end
+    
+    local logoContainer = Instance.new("Frame")
+    logoContainer.Name = "LogoContainer"
+    logoContainer.Size = UDim2.new(0, 0, 0, 0) 
+    logoContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    logoContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    logoContainer.BackgroundColor3 = self.Themes[self.CurrentTheme].AccentColor
+    logoContainer.BorderSizePixel = 0
+    logoContainer.ZIndex = 1001
+    logoContainer.Parent = introFrame
+    
+    local logoCorner = Instance.new("UICorner")
+    logoCorner.CornerRadius = UDim.new(0, 30) 
+    logoCorner.Parent = logoContainer
+    
+    local outlineFrame = Instance.new("Frame")
+    outlineFrame.Name = "WhiteOutline"
+    outlineFrame.Size = UDim2.new(1, 6, 1, 6) 
+    outlineFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    outlineFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    outlineFrame.BackgroundColor3 = Color3.new(1, 1, 1) 
+    outlineFrame.BorderSizePixel = 0
+    outlineFrame.ZIndex = 1000
+    outlineFrame.Parent = logoContainer
+    
+    local clipContainer = Instance.new("Frame")
+    clipContainer.Name = "ClipContainer"
+    clipContainer.Size = UDim2.new(1.05, 0, 1.05, 0) 
+    clipContainer.Position = UDim2.new(0.5, 0, 0.5, 0)
+    clipContainer.AnchorPoint = Vector2.new(0.5, 0.5)
+    clipContainer.BackgroundTransparency = 1
+    clipContainer.ClipsDescendants = true
+    clipContainer.ZIndex = 999
+    clipContainer.Parent = logoContainer
+    
+    outlineFrame.Parent = clipContainer
+    
+    local outlineCorner = Instance.new("UICorner")
+    outlineCorner.CornerRadius = UDim.new(0, 33) 
+    outlineCorner.Parent = outlineFrame
+    
+    spawn(function()
+        while outlineFrame.Parent do
+            for i = 0, 1, 0.05 do
+                if not outlineFrame.Parent then break end
+                
+                local sizeMod = math.sin(i * math.pi) * 4
+                local transparencyMod = 0.3 + (math.sin(i * math.pi) * 0.3)
+                
+                local sizeTween = TweenService:Create(
+                    outlineFrame,
+                    TweenInfo.new(0.05, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                    {Size = UDim2.new(1, 6 + sizeMod, 1, 6 + sizeMod), BackgroundTransparency = transparencyMod}
+                )
+                sizeTween:Play()
+                
+                wait(0.05)
+            end
+        end
+    end)
+    
+    local logoGlow = Instance.new("ImageLabel")
+    logoGlow.Name = "Glow"
+    logoGlow.Size = UDim2.new(1, 50, 1, 50) 
+    logoGlow.Position = UDim2.new(0.5, 0, 0.5, 0)
+    logoGlow.AnchorPoint = Vector2.new(0.5, 0.5)
+    logoGlow.BackgroundTransparency = 1
+    logoGlow.Image = "rbxassetid://4996891970" 
+    logoGlow.ImageColor3 = Color3.new(1, 1, 1) 
+    logoGlow.ImageTransparency = 0.6
+    logoGlow.ZIndex = 999
+    logoGlow.Parent = logoContainer
+    
+    spawn(function()
+        while logoGlow.Parent do
+            local sizeTween = TweenService:Create(
+                logoGlow,
+                TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                {Size = UDim2.new(1, 70, 1, 70), ImageTransparency = 0.7}
+            )
+            sizeTween:Play()
+            wait(1.2)
+            
+            if not logoGlow.Parent then break end
+            
+            local shrinkTween = TweenService:Create(
+                logoGlow,
+                TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                {Size = UDim2.new(1, 50, 1, 50), ImageTransparency = 0.6}
+            )
+            shrinkTween:Play()
+            wait(1.2)
+        end
+    end)
+    
+    local titleText = Instance.new("TextLabel")
+    titleText.Name = "TitleText"
+    titleText.Size = UDim2.new(1, 0, 0, 40)
+    titleText.Position = UDim2.new(0, 0, 0.3, 0)
+    titleText.BackgroundTransparency = 1
+    titleText.Font = Enum.Font.GothamBold
+    titleText.Text = "" 
+    titleText.TextSize = 24
+    titleText.TextColor3 = Color3.new(1, 1, 1)
+    titleText.TextTransparency = 0
+    titleText.ZIndex = 1002
+    titleText.Parent = logoContainer
+    
+    local descriptionText = Instance.new("TextLabel")
+    descriptionText.Name = "DescriptionText"
+    descriptionText.Size = UDim2.new(1, -40, 0, 60)
+    descriptionText.Position = UDim2.new(0, 20, 0.55, 0)
+    descriptionText.BackgroundTransparency = 1
+    descriptionText.Font = Enum.Font.Gotham
+    descriptionText.Text = description
+    descriptionText.TextSize = 16
+    descriptionText.TextColor3 = Color3.new(1, 1, 1)
+    descriptionText.TextTransparency = 1 
+    descriptionText.TextWrapped = true
+    descriptionText.ZIndex = 1002
+    descriptionText.Parent = logoContainer
+    
+    local loadingContainer = Instance.new("Frame")
+    loadingContainer.Name = "LoadingContainer"
+    loadingContainer.Size = UDim2.new(0.8, 0, 0, 6)
+    loadingContainer.Position = UDim2.new(0.1, 0, 0.8, 0)
+    loadingContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    loadingContainer.BorderSizePixel = 0
+    loadingContainer.ZIndex = 1002
+    loadingContainer.Parent = logoContainer
+    
+    local loadingCorner = Instance.new("UICorner")
+    loadingCorner.CornerRadius = UDim.new(0, 3)
+    loadingCorner.Parent = loadingContainer
+    
+    local loadingFill = Instance.new("Frame")
+    loadingFill.Name = "LoadingFill"
+    loadingFill.Size = UDim2.new(0, 0, 1, 0) 
+    loadingFill.BackgroundColor3 = self.Themes[self.CurrentTheme].AccentColor
+    loadingFill.BorderSizePixel = 0
+    loadingFill.ZIndex = 1003
+    loadingFill.Parent = loadingContainer
+    
+    local fillCorner = Instance.new("UICorner")
+    fillCorner.CornerRadius = UDim.new(0, 3)
+    fillCorner.Parent = loadingFill
+    
+    local loadingText = Instance.new("TextLabel")
+    loadingText.Name = "LoadingText"
+    loadingText.Size = UDim2.new(1, 0, 0, 20)
+    loadingText.Position = UDim2.new(0, 0, 0.9, 0)
+    loadingText.BackgroundTransparency = 1
+    loadingText.Font = Enum.Font.Gotham
+    loadingText.Text = "Loading..."
+    loadingText.TextSize = 14
+    loadingText.TextColor3 = Color3.new(1, 1, 1)
+    loadingText.TextTransparency = 1 
+    loadingText.ZIndex = 1002
+    loadingText.Parent = logoContainer
+    
+    for i = 1, 25 do 
+        spawn(function()
+            local particle = Instance.new("Frame")
+            particle.Name = "Particle" .. i
+            particle.Size = UDim2.new(0, math.random(2, 8), 0, math.random(2, 8)) 
+            particle.Position = UDim2.new(math.random(), 0, math.random(), 0)
+            
+            local useWhite = math.random() > 0.7
+            particle.BackgroundColor3 = useWhite and Color3.new(1, 1, 1) or self.Themes[self.CurrentTheme].AccentColor
+            particle.BackgroundTransparency = math.random(30, 85) / 100
+            particle.BorderSizePixel = 0
+            particle.ZIndex = 1001
+            particle.Parent = introFrame
+            
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 8) 
+            corner.Parent = particle
+            
+            if math.random() > 0.6 then
+                local glow = Instance.new("ImageLabel")
+                glow.Name = "ParticleGlow"
+                glow.Size = UDim2.new(1, 6, 1, 6)
+                glow.Position = UDim2.new(0.5, 0, 0.5, 0)
+                glow.AnchorPoint = Vector2.new(0.5, 0.5)
+                glow.BackgroundTransparency = 1
+                glow.Image = "rbxassetid://4996891970" 
+                glow.ImageColor3 = particle.BackgroundColor3
+                glow.ImageTransparency = 0.7
+                glow.ZIndex = 1000
+                glow.Parent = particle
+            end
+            
+            local speed = math.random(12, 30) / 10 
+            local startPosition = particle.Position
+            
+            local angle = math.random() * math.pi * 2
+            local radius = math.random(5, 15) / 100
+            local baseX = startPosition.X.Scale
+            local baseY = startPosition.Y.Scale
+            
+            for j = 1, 50 do 
+                local progress = j / 50
+                local xOffset = math.sin(angle + (progress * math.pi * 2)) * radius
+                local yOffset = math.cos(angle + (progress * math.pi * 2)) * radius
+                
+                xOffset = xOffset + (math.random(-2, 2) / 100)
+                yOffset = yOffset + (math.random(-2, 2) / 100)
+                
+                local newX = baseX + xOffset
+                local newY = baseY + yOffset
+                
+                newX = math.clamp(newX, 0, 1)
+                newY = math.clamp(newY, 0, 1)
+                
+                local posTween = TweenService:Create(
+                    particle,
+                    TweenInfo.new(speed, Enum.EasingStyle.Cubic, Enum.EasingDirection.InOut),
+                    {
+                        Position = UDim2.new(newX, 0, newY, 0),
+                        BackgroundTransparency = math.random(30, 85) / 100,
+                        Size = UDim2.new(0, math.random(2, 8), 0, math.random(2, 8))
+                    }
+                )
+                posTween:Play()
+                wait(speed / 2) 
+            end
+        end)
+    end
+    
+    local containerSizeTween = TweenService:Create(
+        logoContainer,
+        TweenInfo.new(0.7, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        {Size = UDim2.new(0, 350, 0, 250)}
+    )
+    containerSizeTween:Play()
+    
+    wait(0.8)
+    
+    for i = 1, #title do
+        titleText.Text = string.sub(title, 1, i)
+        wait(0.05)
+    end
+    
+    wait(0.3)
+    
+    local descriptionFadeTween = TweenService:Create(
+        descriptionText,
+        TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+    descriptionFadeTween:Play()
+    
+    wait(0.5)
+    
+    local loadingTextFadeTween = TweenService:Create(
+        loadingText,
+        TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 0}
+    )
+    loadingTextFadeTween:Play()
+    
+    spawn(function()
+        local pulseIntensity = 0
+        local pulseDirection = 1
+        local originalHeight = loadingFill.Size.Y.Scale
+        local pulseTimer = 0
+        
+        for progress = 0, 1, 0.01 do
+            local progressTween = TweenService:Create(
+                loadingFill,
+                TweenInfo.new(0.05, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                {Size = UDim2.new(progress, 0, 1 + pulseIntensity, 0)}
+            )
+            progressTween:Play()
+            
+            if progress > 0.95 then
+                local colorTween = TweenService:Create(
+                    loadingFill,
+                    TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                    {BackgroundColor3 = Color3.fromRGB(100, 230, 100)}
+                )
+                colorTween:Play()
+            elseif progress > 0.7 then
+                local colorTween = TweenService:Create(
+                    loadingFill,
+                    TweenInfo.new(0.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+                    {BackgroundColor3 = self.Themes[self.CurrentTheme].AccentColor:Lerp(Color3.new(1, 1, 1), 0.3)}
+                )
+                colorTween:Play()
+            end
+            
+            pulseTimer = pulseTimer + 0.05
+            pulseIntensity = math.sin(pulseTimer * 5) * 0.05 
+            
+            local percentage = math.floor(progress * 100)
+            loadingText.Text = "Loading... " .. percentage .. "%"
+            
+            if percentage == 25 or percentage == 50 or percentage == 75 then
+                wait(0.1) 
+            elseif percentage == 99 then
+                wait(0.3) 
+            else
+                wait(0.035) 
+            end
+        end
+        
+        for i = 1, 3 do
+            local expandTween = TweenService:Create(
+                loadingFill,
+                TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                {Size = UDim2.new(1, 0, 1.2, 0)}
+            )
+            expandTween:Play()
+            wait(0.15)
+            
+            local contractTween = TweenService:Create(
+                loadingFill,
+                TweenInfo.new(0.15, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+                {Size = UDim2.new(1, 0, 1, 0)}
+            )
+            contractTween:Play()
+            wait(0.15)
+        end
+        
+        loadingText.Text = "Loading Complete!"
+    end)
+    
+    spawn(function()
+        for i = 1, 4 do
+            local pulseTween = TweenService:Create(
+                logoContainer,
+                TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.In),
+                {BackgroundColor3 = self.Themes[self.CurrentTheme].AccentColor:Lerp(Color3.new(1, 1, 1), 0.2)}
+            )
+            pulseTween:Play()
+            wait(0.5)
+            
+            local returnTween = TweenService:Create(
+                logoContainer,
+                TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
+                {BackgroundColor3 = self.Themes[self.CurrentTheme].AccentColor}
+            )
+            returnTween:Play()
+            wait(0.5)
+        end
+    end)
+    
+    wait(4)
+    
+    local finalFadeTween = TweenService:Create(
+        introFrame,
+        TweenInfo.new(0.8, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut),
+        {BackgroundTransparency = 1}
+    )
+    finalFadeTween:Play()
+    
+    local logoFadeTween = TweenService:Create(
+        logoContainer,
+        TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {BackgroundTransparency = 1}
+    )
+    logoFadeTween:Play()
+    
+    local titleFadeTween = TweenService:Create(
+        titleText,
+        TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 1}
+    )
+    titleFadeTween:Play()
+    
+    local descriptionFadeOutTween = TweenService:Create(
+        descriptionText,
+        TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 1}
+    )
+    descriptionFadeOutTween:Play()
+    
+    local loadingTextFadeOutTween = TweenService:Create(
+        loadingText,
+        TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+        {TextTransparency = 1}
+    )
+    loadingTextFadeOutTween:Play()
+    
+    spawn(function()
+        wait(1)
+        introFrame:Destroy()
+    end)
+end
+
+
+return ZIvyer
