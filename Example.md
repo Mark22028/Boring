@@ -10,9 +10,9 @@ local ZIvyer = loadstring(game:HttpGet("https://raw.githubusercontent.com/Mark22
 ### Create a new UI with customized intro (intro will always show for 5 seconds)
 ```
 local UI = ZIvyer.new({
-    UIName = "My Super Smooth App", -- Name of the UI in Explorer
-    IntroTitle = "My Super App", -- Title shown in intro
-    IntroDescription = "Experience the super duper ultra ultimate smoothness" -- Description in intro
+    UIName = "ZIvyerUI", -- Name of the UI in Explorer
+    IntroTitle = "Title", -- Title shown in intro
+    IntroDescription = "Desc" -- Description in intro
 })
 ```
 ### All themes are available: Dark, Light, Black, Green, Cyan, Blue, Diamond, Gold, Yellow, Pink, Gray/Grey, Red, Orange, Purple, Violet, White
